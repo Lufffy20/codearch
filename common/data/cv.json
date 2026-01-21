@@ -30,7 +30,8 @@
         }
     ],
     "social": {
+        "linkedin": "https://linkedin.com/in/johndoe",
         "github": "https://github.com/johndoe",
-        "linkedin": "https://linkedin.com/in/johndoe"
+        "portfolio": "https://johndoe.dev"
     }
 }
