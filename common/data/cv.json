@@ -1,0 +1,36 @@
+{
+    "personal": {
+        "name": "John Doe",
+        "role": "Yii2 Developer",
+        "email": "john.doe@example.com",
+        "phone": "+91 99999 99999",
+        "location": "India"
+    },
+    "summary": "Experienced Yii2 developer with strong knowledge of PHP, MVC architecture, and REST APIs.",
+    "skills": [
+        "PHP",
+        "Yii2 Framework",
+        "MySQL",
+        "REST API",
+        "Git"
+    ],
+    "experience": [
+        {
+            "company": "ABC Technologies",
+            "position": "Yii2 Developer",
+            "duration": "2022 – 2024",
+            "description": "Worked on backend development, API creation, and database optimization."
+        }
+    ],
+    "education": [
+        {
+            "degree": "B.Tech in Computer Science",
+            "institute": "XYZ University",
+            "year": "2021"
+        }
+    ],
+    "social": {
+        "github": "https://github.com/johndoe",
+        "linkedin": "https://linkedin.com/in/johndoe"
+    }
+}

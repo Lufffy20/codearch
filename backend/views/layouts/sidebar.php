@@ -35,29 +35,12 @@ use yii\helpers\Url;
                 </li>
 
                 <li class="sidebar-item">
-                    <a class="sidebar-link success-hover-bg" href="<?= Url::to(['/site/dashboard2']) ?>">
+                    <a class="sidebar-link success-hover-bg" href="<?= Url::to(['/cv/cv']) ?>">
                         <span class="aside-icon p-2 bg-success-subtle rounded-1">
                             <i class="ti ti-chart-line"></i>
                         </span>
-                        <span class="hide-menu ps-1">Dashboard 2</span>
+                        <span class="hide-menu ps-1">CV</span>
                     </a>
-                </li>
-
-                <li class="sidebar-item">
-                    <a class="sidebar-link has-arrow indigo-hover-bg" href="javascript:void(0)">
-                        <span class="aside-icon p-2 bg-indigo-subtle rounded-1">
-                            <i class="ti ti-layout"></i>
-                        </span>
-                        <span class="hide-menu ps-1">Front Pages</span>
-                    </a>
-
-                    <ul class="collapse first-level">
-                        <li class="sidebar-item"><a href="<?= Url::to(['/site/home']) ?>" class="sidebar-link">Homepage</a></li>
-                        <li class="sidebar-item"><a href="<?= Url::to(['/site/about']) ?>" class="sidebar-link">About Us</a></li>
-                        <li class="sidebar-item"><a href="<?= Url::to(['/site/blog']) ?>" class="sidebar-link">Blog</a></li>
-                        <li class="sidebar-item"><a href="<?= Url::to(['/site/contact']) ?>" class="sidebar-link">Contact Us</a></li>
-                        <li class="sidebar-item"><a href="<?= Url::to(['/site/pricing']) ?>" class="sidebar-link">Pricing</a></li>
-                    </ul>
                 </li>
 
             </ul>
