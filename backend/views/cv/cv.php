@@ -8,22 +8,29 @@ use yii\helpers\Html;
     <!-- ================= PROFILE HEADER ================= -->
     <div class="card mb-4">
         <div class="card-body text-center">
+
             <h2 class="fw-bold mb-1">
                 <?= Html::encode($cvData['personal']['name'] ?? '—') ?>
             </h2>
+
             <p class="text-muted mb-2">
                 <?= Html::encode($cvData['personal']['role'] ?? '') ?>
             </p>
 
-            <p><?= Html::encode($cvData['personal']['email'] ?? '') ?></p>
-            <p><?= Html::encode($cvData['personal']['phone'] ?? '') ?></p>
-            <p><?= Html::encode($cvData['personal']['location'] ?? '') ?></p>
-            <p><?= Html::encode($cvData['summary'] ?? '') ?></p>
+            <p class="mb-1"><?= Html::encode($cvData['personal']['email'] ?? '') ?></p>
+            <p class="mb-1"><?= Html::encode($cvData['personal']['phone'] ?? '') ?></p>
+            <p class="mb-2"><?= Html::encode($cvData['personal']['location'] ?? '') ?></p>
 
+            <?php if (!empty($cvData['summary'])): ?>
+                <p class="mt-2">
+                    <?= Html::encode($cvData['summary']) ?>
+                </p>
+            <?php endif; ?>
 
-
+            <!-- ================= SOCIAL LINKS ================= -->
             <?php if (!empty($cvData['social'])): ?>
-                <div class="d-flex justify-content-center gap-3 mt-2">
+                <div class="d-flex justify-content-center gap-3 mt-3">
+
                     <?php if (!empty($cvData['social']['linkedin'])): ?>
                         <a href="<?= Html::encode($cvData['social']['linkedin']) ?>" target="_blank" class="text-primary">
                             <i class="ti ti-brand-linkedin fs-5"></i>
@@ -41,8 +48,22 @@ use yii\helpers\Html;
                             <i class="ti ti-world fs-5"></i>
                         </a>
                     <?php endif; ?>
+
                 </div>
             <?php endif; ?>
+
+            <!-- ================= DOWNLOAD PDF BUTTON ================= -->
+            <div class="mt-4">
+                <?= Html::a(
+                    '<i class="ti ti-download me-1"></i> Download PDF',
+                    ['cv/download'],
+                    [
+                        'class' => 'btn btn-primary btn-sm',
+                        'target' => '_blank'
+                    ]
+                ) ?>
+            </div>
+
         </div>
     </div>
 
@@ -56,6 +77,7 @@ use yii\helpers\Html;
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Skills</h5>
+
                         <ul class="list-unstyled mb-0">
                             <?php foreach ($cvData['skills'] as $skill): ?>
                                 <li class="d-flex align-items-center mb-2">
@@ -64,6 +86,7 @@ use yii\helpers\Html;
                                 </li>
                             <?php endforeach; ?>
                         </ul>
+
                     </div>
                 </div>
             <?php endif; ?>
@@ -84,10 +107,12 @@ use yii\helpers\Html;
                                 <h6 class="fw-semibold mb-1">
                                     <?= Html::encode($exp['position'] ?? '') ?>
                                 </h6>
+
                                 <p class="text-muted mb-2">
                                     <?= Html::encode($exp['company'] ?? '') ?>
                                     <?= !empty($exp['duration']) ? ' • ' . Html::encode($exp['duration']) : '' ?>
                                 </p>
+
                                 <?php if (!empty($exp['description'])): ?>
                                     <p class="mb-0">
                                         <?= Html::encode($exp['description']) ?>
@@ -111,6 +136,7 @@ use yii\helpers\Html;
                                 <h6 class="fw-semibold mb-1">
                                     <?= Html::encode($edu['degree'] ?? '') ?>
                                 </h6>
+
                                 <p class="text-muted mb-0">
                                     <?= Html::encode($edu['institute'] ?? '') ?>
                                     <?= !empty($edu['year']) ? ' • ' . Html::encode($edu['year']) : '' ?>
