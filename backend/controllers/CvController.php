@@ -2,17 +2,18 @@
 
 namespace backend\controllers;
 
-use yii\web\Controller;
 use Yii;
-use Mpdf\Mpdf;
+use yii\web\Controller;
 use yii\web\Response;
-
-
+use Mpdf\Mpdf;
 
 class CvController extends Controller
 {
-
-    // Add this method to control who can access the CV
+    /**
+     * Access control configuration
+     * Allows both guests (?) and authenticated users (@)
+     * to access CV view and download actions
+     */
     public function behaviors()
     {
         return [
@@ -20,57 +21,72 @@ class CvController extends Controller
                 'class' => \yii\filters\AccessControl::class,
                 'rules' => [
                     [
-                        'allow' => true,
-                        'actions' => ['cv', 'download'], // Specify allowed actions
-                        'roles' => ['?', '@'], // Allow guests and authenticated users
+                        'allow'   => true,
+                        'actions'=> ['cv', 'download'],
+                        'roles'  => ['?', '@'],
                     ],
-                    // Add more rules as needed
                 ],
             ],
         ];
     }
 
-
+    /**
+     * Display CV page
+     * CV data is loaded from cache (or JSON file if cache miss)
+     */
     public function actionCv()
     {
         $cacheKey = 'cv_data';
-        $cacheTtl = 3600;
+        $cacheTtl = 3600; // cache for 1 hour
 
-        $cvData = Yii::$app->cache->getOrSet($cacheKey, function () {
+        $cvData = Yii::$app->cache->getOrSet(
+            $cacheKey,
+            function () {
+                $filePath = Yii::getAlias('@common/data/cv.json');
 
-            $filePath = Yii::getAlias('@common/data/cv.json');
+                // If CV file does not exist, return empty array
+                if (!file_exists($filePath)) {
+                    return [];
+                }
 
-            if (!file_exists($filePath)) {
-                return [];
-            }
-
-            return json_decode(file_get_contents($filePath), true);
-        }, $cacheTtl);
+                // Decode JSON CV data
+                return json_decode(file_get_contents($filePath), true);
+            },
+            $cacheTtl
+        );
 
         return $this->render('cv', [
             'cvData' => $cvData,
         ]);
     }
 
-    // ✅ Method 2: Clear only CV cache
+    /**
+     * Clear only CV-related cache
+     * Useful after updating cv.json
+     */
     public function actionClearCvCache()
     {
         Yii::$app->cache->delete('cv_data');
 
-        // optional: flash message
+        // Optional success message
         Yii::$app->session->setFlash('success', 'CV cache cleared');
 
         return $this->redirect(['cv']);
     }
 
-
+    /**
+     * Download CV as PDF
+     * Uses cached CV data and mPDF for PDF generation
+     */
     public function actionDownload()
     {
-        // 1. Fetch CV data (reuse cache)
+        // Fetch CV data from cache
         $cvData = Yii::$app->cache->get('cv_data');
 
+        // If cache is empty, load data from JSON file
         if ($cvData === false) {
             $filePath = Yii::getAlias('@common/data/cv.json');
+
             $cvData = file_exists($filePath)
                 ? json_decode(file_get_contents($filePath), true)
                 : [];
@@ -78,21 +94,22 @@ class CvController extends Controller
             Yii::$app->cache->set('cv_data', $cvData);
         }
 
-        // 2. Render PDF-specific view into HTML
+        // Render PDF-specific view as HTML
         $html = $this->renderPartial('cv-pdf', [
             'cvData' => $cvData,
         ]);
 
-        // 3. Generate PDF
+        // Initialize mPDF with basic configuration
         $mpdf = new Mpdf([
-            'format' => 'A4',
-            'margin_top' => 10,
+            'format'        => 'A4',
+            'margin_top'    => 10,
             'margin_bottom' => 10,
         ]);
 
+        // Write HTML content to PDF
         $mpdf->WriteHTML($html);
 
-        // 🔥 4. Yii-controlled response (THIS FIXES THE TEST)
+        // Prepare Yii response for PDF download
         $response = Yii::$app->response;
         $response->format = Response::FORMAT_RAW;
         $response->headers->set('Content-Type', 'application/pdf');
@@ -101,6 +118,7 @@ class CvController extends Controller
             'attachment; filename="cv.pdf"'
         );
 
-        return $mpdf->Output('', 'S'); // return PDF as string
+        // Return PDF output as string (important for tests)
+        return $mpdf->Output('', 'S');
     }
 }

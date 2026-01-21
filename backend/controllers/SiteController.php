@@ -2,41 +2,48 @@
 
 namespace backend\controllers;
 
-use common\models\LoginForm;
 use Yii;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
+use common\models\LoginForm;
 
 /**
- * Site controller
+ * SiteController
+ * Handles authentication and basic site actions
  */
 class SiteController extends Controller
 {
     /**
-     * {@inheritdoc}
+     * Defines access rules and HTTP verb filters
      */
     public function behaviors()
     {
         return [
+            // Access control configuration
             'access' => [
                 'class' => AccessControl::class,
                 'rules' => [
+                    // Allow guests to access login and error pages
                     [
                         'actions' => ['login', 'error'],
-                        'allow' => true,
+                        'allow'   => true,
                     ],
+                    // Allow authenticated users to access index and logout
                     [
                         'actions' => ['logout', 'index'],
-                        'allow' => true,
-                        'roles' => ['@'],
+                        'allow'   => true,
+                        'roles'   => ['@'],
                     ],
                 ],
             ],
+
+            // HTTP verb restrictions
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
+                    // Logout should only be accessible via POST
                     'logout' => ['post'],
                 ],
             ],
@@ -44,11 +51,12 @@ class SiteController extends Controller
     }
 
     /**
-     * {@inheritdoc}
+     * Declares external actions for the controller
      */
     public function actions()
     {
         return [
+            // Default error handler
             'error' => [
                 'class' => \yii\web\ErrorAction::class,
             ],
@@ -56,7 +64,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Displays homepage.
+     * Displays the dashboard / homepage
      *
      * @return string
      */
@@ -66,23 +74,28 @@ class SiteController extends Controller
     }
 
     /**
-     * Login action.
+     * Handles user login
      *
      * @return string|Response
      */
     public function actionLogin()
     {
+        // If user is already logged in, redirect to home
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
 
+        // Use blank layout for login page
         $this->layout = 'blank';
 
         $model = new LoginForm();
+
+        // Process login form submission
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
             return $this->goBack();
         }
 
+        // Clear password field before rendering
         $model->password = '';
 
         return $this->render('login', [
@@ -91,7 +104,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Logout action.
+     * Logs out the current user
      *
      * @return Response
      */

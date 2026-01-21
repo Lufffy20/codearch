@@ -15,6 +15,7 @@ class AppAsset extends AssetBundle
         'css/site.css',
         'assets1/css/styles.css',
         'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css',
+
     ];
     public $js = [
         // Library JS files
@@ -25,6 +26,7 @@ class AppAsset extends AssetBundle
         // Theme
         'assets1/js/theme/app.init-1.js',
         'assets1/js/theme/app.min-1.js',
+        'https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',
