@@ -50,7 +50,7 @@ use yii\helpers\Url;
                                     <div class="col-6">
                                         <?= Html::a(
                                             '<div class="bg-light-subtle rounded-1 me-3 p-6">
-                                                <img src="' . Url::to('@web/assets1/images/svgs/icon-dd-calendar.svg') . '" width="24">
+                                                <img src="' . Url::to('@web/assets1/images/svgs/icon-dd-date.svg') . '" width="24">
                                              </div>
                                              <div>
                                                 <h6>Calendar</h6>
