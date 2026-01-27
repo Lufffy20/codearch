@@ -1,6 +1,6 @@
 {
     "personal": {
-        "name": "John Doe",
+        "name": "Parmar meet",
         "role": "Yii2 Developer",
         "email": "john.doe@example.com",
         "phone": "+91 99999 99999",
@@ -12,7 +12,7 @@
         "Yii2 Framework",
         "MySQL",
         "REST API",
-        "Git"
+        "Git111"
     ],
     "experience": [
         {
@@ -20,9 +20,26 @@
             "position": "Yii2 Developer",
             "duration": "2022 – 2024",
             "description": "Worked on backend development, API creation, and database optimization."
+        },
+        {
+            "company": "ABC Technologies",
+            "position": "Yii2 Developer",
+            "duration": "2022 – 2024",
+            "description": "Worked on backend development, API creation, and database optimization."
+        },
+        {
+            "company": "ABC Technologies12345",
+            "position": "Yii2 Developer",
+            "duration": "2022 – 2024",
+            "description": "Worked on backend development, API creation, and database optimization."
         }
     ],
     "education": [
+        {
+            "degree": "B.Tech in Computer Science",
+            "institute": "XYZ University",
+            "year": "2021"
+        },
         {
             "degree": "B.Tech in Computer Science",
             "institute": "XYZ University",

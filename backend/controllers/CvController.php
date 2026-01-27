@@ -2,17 +2,23 @@
 
 namespace backend\controllers;
 
-use yii\web\Controller;
 use Yii;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use Mpdf\Mpdf;
-use yii\web\Response;
-
-
+use common\models\{
+    Cv,
+    PersonalDetails,
+    Education,
+    Experience,
+    Skill,
+    Social,
+    CvTemplate
+};
+use common\services\CvService;
 
 class CvController extends Controller
 {
-
-    // Add this method to control who can access the CV
     public function behaviors()
     {
         return [
@@ -21,86 +27,265 @@ class CvController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['cv', 'download'], // Specify allowed actions
-                        'roles' => ['?', '@'], // Allow guests and authenticated users
+                        'roles' => ['@'],
                     ],
-                    // Add more rules as needed
                 ],
             ],
         ];
     }
 
+    /* ================= INDEX ================= */
 
-    public function actionCv()
+    public function actionIndex()
     {
-        $cacheKey = 'cv_data';
-        $cacheTtl = 3600;
+        $cvs = Cv::find()
+            ->where(['user_id' => Yii::$app->user->id])
+            ->orderBy(['id' => SORT_DESC])
+            ->all();
 
-        $cvData = Yii::$app->cache->getOrSet($cacheKey, function () {
-
-            $filePath = Yii::getAlias('@common/data/cv.json');
-
-            if (!file_exists($filePath)) {
-                return [];
-            }
-
-            return json_decode(file_get_contents($filePath), true);
-        }, $cacheTtl);
-
-        return $this->render('cv', [
-            'cvData' => $cvData,
-        ]);
+        return $this->render('index', compact('cvs'));
     }
 
-    // ✅ Method 2: Clear only CV cache
-    public function actionClearCvCache()
+    /* ================= VIEW / PREVIEW ================= */
+
+    public function actionCv($id)
     {
-        Yii::$app->cache->delete('cv_data');
+        $cv = $this->findUserCv($id);
+        $forceTemplate = (bool) Yii::$app->request->get('template');
 
-        // optional: flash message
-        Yii::$app->session->setFlash('success', 'CV cache cleared');
+        if ($cv->shouldUseTemplate($forceTemplate)) {
+            $rendered = $cv->renderWithTemplate();
 
-        return $this->redirect(['cv']);
-    }
-
-
-    public function actionDownload()
-    {
-        // 1. Fetch CV data (reuse cache)
-        $cvData = Yii::$app->cache->get('cv_data');
-
-        if ($cvData === false) {
-            $filePath = Yii::getAlias('@common/data/cv.json');
-            $cvData = file_exists($filePath)
-                ? json_decode(file_get_contents($filePath), true)
-                : [];
-
-            Yii::$app->cache->set('cv_data', $cvData);
+            return $this->render('cv-template', [
+                'html' => $rendered['html'],
+                'css'  => $rendered['css'],
+                'cvId' => $cv->id,
+            ]);
         }
 
-        // 2. Render PDF-specific view into HTML
-        $html = $this->renderPartial('cv-pdf', [
-            'cvData' => $cvData,
+        return $this->render('cv', [
+            'cvData' => $cv->getCvData(),
+            'cvId'   => $cv->id,
+        ]);
+    }
+
+    /* ================= DOWNLOAD ================= */
+
+    public function actionDownload($id)
+    {
+        $cv = $this->findUserCv($id);
+
+        $templateId = Yii::$app->request->get('template_id');
+
+        if ($templateId) {
+
+            // 🔹 TEMPORARY template render (no DB save)
+            $html = $cv->renderWithTemplate($templateId)['html'];
+        } else {
+
+            // 🔹 Default CV PDF
+            $html = $this->renderPartial('cv-pdf', [
+                'cvData' => $cv->getCvData(),
+            ]);
+        }
+
+        return $this->downloadPdf($html, 'cv_' . $cv->id . '.pdf');
+    }
+
+
+    /* ================= CREATE ================= */
+
+    public function actionCreate()
+    {
+        $cv = new Cv([
+            'user_id'     => Yii::$app->user->id,
+            'template_id' => CvTemplate::find()
+                ->select('id')
+                ->where(['is_active' => true])
+                ->orderBy(['id' => SORT_ASC])
+                ->scalar(),
+
         ]);
 
-        // 3. Generate PDF
+        $personal  = new PersonalDetails();
+        $templates = CvTemplate::getActiveTemplates();
+        extract($this->getFormCollections());
+
+        if (
+            $cv->load(Yii::$app->request->post()) &&
+            $personal->load(Yii::$app->request->post()) &&
+            CvService::saveCv($cv, $personal, Yii::$app->request->post())
+        ) {
+            Yii::$app->session->setFlash('success', 'CV created successfully 🎉');
+            return $this->redirect(['templates', 'id' => $cv->id]);
+        }
+
+        return $this->render('create', compact(
+            'cv',
+            'personal',
+            'templates',
+            'educations',
+            'experiences',
+            'skills',
+            'socials'
+        ));
+    }
+
+    /* ================= UPDATE ================= */
+
+    public function actionUpdate($id)
+    {
+        $cv = $this->findUserCv($id, false);
+
+        $personal = PersonalDetails::findOne(['cv_id' => $cv->id])
+            ?? new PersonalDetails(['cv_id' => $cv->id]);
+
+        $templates = CvTemplate::getActiveTemplates();
+        extract($this->getFormCollections($cv->id));
+
+        if (
+            $cv->load(Yii::$app->request->post()) &&
+            $personal->load(Yii::$app->request->post()) &&
+            CvService::saveCv($cv, $personal, Yii::$app->request->post(), true)
+        ) {
+            Yii::$app->session->setFlash('success', 'CV updated successfully 🎉');
+            return $this->refresh();
+        }
+
+        return $this->render('update', compact(
+            'cv',
+            'personal',
+            'templates',
+            'educations',
+            'experiences',
+            'skills',
+            'socials'
+        ));
+    }
+
+    /* ================= TEMPLATE SELECT ================= */
+
+    public function actionTemplates($id)
+    {
+        $cv = $this->findUserCv($id, false);
+        $templates = CvTemplate::getActiveTemplates();
+
+        if ($templateId = Yii::$app->request->post('template_id')) {
+
+            if (!CvTemplate::find()->where(['id' => $templateId, 'is_active' => true])->exists()) {
+                throw new NotFoundHttpException('Invalid template');
+            }
+
+            $cv->updateAttributes(['template_id' => $templateId]);
+            Yii::$app->session->setFlash('success', 'Template updated successfully!');
+            return $this->redirect(['cv', 'id' => $cv->id, 'template' => 1]);
+        }
+
+        return $this->render('templates', compact('cv', 'templates'));
+    }
+
+    /* ================= PREVIEW ================= */
+
+    public function actionPreview($id, $template_id)
+    {
+        $cv = $this->findUserCv($id, false);
+
+        $originalTemplate = $cv->template_id;
+        $cv->template_id = $template_id;
+
+        $rendered = $cv->renderWithTemplate();
+        $cv->template_id = $originalTemplate;
+
+        return $this->renderAjax('_template_preview', [
+            'html' => $rendered['html'],
+            'css'  => $rendered['css'],
+        ]);
+    }
+
+    /* ================= DELETE ================= */
+
+    public function actionDelete($id)
+    {
+        $cv = $this->findUserCv($id, false);
+        $cv->delete();
+
+        Yii::$app->session->setFlash('success', 'CV deleted successfully 🗑️');
+        return $this->redirect(['index']);
+    }
+
+    /* ================= HELPERS ================= */
+
+    private function findUserCv($id, bool $withTemplate = true): Cv
+    {
+        $relations = ['personalDetails', 'educations', 'experiences', 'skills', 'socials'];
+        if ($withTemplate) {
+            $relations[] = 'template';
+        }
+
+        $cv = Cv::find()
+            ->with($relations)
+            ->where(['id' => $id, 'user_id' => Yii::$app->user->id])
+            ->one();
+
+        if (!$cv) {
+            throw new NotFoundHttpException('CV not found');
+        }
+
+        return $cv;
+    }
+
+    private function getFormCollections(?int $cvId = null): array
+    {
+        $educations  = $cvId ? Education::findAll(['cv_id' => $cvId]) : [];
+        $experiences = $cvId ? Experience::findAll(['cv_id' => $cvId]) : [];
+        $skills      = $cvId ? Skill::findAll(['cv_id' => $cvId]) : [];
+        $socials     = $cvId ? Social::findAll(['cv_id' => $cvId]) : [];
+
+        return [
+            'educations'  => $this->withAtLeastOne($educations, Education::class),
+            'experiences' => $this->withAtLeastOne($experiences, Experience::class),
+            'skills'      => $this->withAtLeastOne($skills, Skill::class),
+            'socials'     => $this->withAtLeastOne($socials, Social::class),
+        ];
+    }
+
+    private function withAtLeastOne(array $models, string $class)
+    {
+        return empty($models) ? [new $class()] : $models;
+    }
+
+
+    private function downloadPdf(string $html, string $filename)
+    {
         $mpdf = new Mpdf([
-            'format' => 'A4',
-            'margin_top' => 10,
+            'format'        => 'A4',
+            'margin_top'    => 10,
             'margin_bottom' => 10,
+            'tempDir'       => Yii::getAlias('@runtime/mpdf'),
         ]);
 
         $mpdf->WriteHTML($html);
+        return $mpdf->Output($filename, \Mpdf\Output\Destination::DOWNLOAD);
+    }
 
-        // 🔥 4. Yii-controlled response (THIS FIXES THE TEST)
-        $response = Yii::$app->response;
-        $response->format = Response::FORMAT_RAW;
-        $response->headers->set('Content-Type', 'application/pdf');
-        $response->headers->set(
-            'Content-Disposition',
-            'attachment; filename="cv.pdf"'
-        );
+    /* ================= THUMBNAIL ================= */
 
-        return $mpdf->Output('', 'S'); // return PDF as string
+    public function actionThumbnail($id, $template_id)
+    {
+        $cv = $this->findUserCv($id, false);
+
+        // temporary template switch (FlowCV style)
+        $originalTemplate = $cv->template_id;
+        $cv->template_id = $template_id;
+
+        $rendered = $cv->renderWithTemplate();
+
+        // restore original template
+        $cv->template_id = $originalTemplate;
+
+        return $this->renderPartial('_template_thumbnail', [
+            'html' => $rendered['html'],
+            'css'  => $rendered['css'],
+        ]);
     }
 }

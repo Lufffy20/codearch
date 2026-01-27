@@ -1,0 +1,20 @@
+{
+    "projects": [
+        {
+            "title": "CRM System",
+            "tech": [
+                "Yii2",
+                "MySQL"
+            ],
+            "year": 2024
+        },
+        {
+            "title": "E-commerce",
+            "tech": [
+                "Laravel",
+                "Razorpay"
+            ],
+            "year": 2025
+        }
+    ]
+}
