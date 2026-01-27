@@ -2,9 +2,11 @@
 
 use backend\assets\AppAsset;
 use yii\helpers\Html;
+use common\widgets\Alert;
 
 AppAsset::register($this);
 ?>
+
 
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -35,6 +37,7 @@ AppAsset::register($this);
 
             <!-- ================= MAIN CONTENT ================= -->
             <div class="container-fluid">
+                <?= Alert::widget() ?>
                 <?= $content ?>
             </div>
 

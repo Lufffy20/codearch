@@ -30,25 +30,13 @@ use yii\helpers\Html;
             <!-- ================= SOCIAL LINKS ================= -->
             <?php if (!empty($cvData['social'])): ?>
                 <div class="d-flex justify-content-center gap-3 mt-3">
-
-                    <?php if (!empty($cvData['social']['linkedin'])): ?>
-                        <a href="<?= Html::encode($cvData['social']['linkedin']) ?>" target="_blank" class="text-primary">
-                            <i class="ti ti-brand-linkedin fs-5"></i>
+                    <?php foreach ($cvData['social'] as $item): ?>
+                        <a href="<?= Html::encode($item['url']) ?>"
+                            target="_blank"
+                            class="text-decoration-none">
+                            <?= Html::encode($item['platform']) ?>
                         </a>
-                    <?php endif; ?>
-
-                    <?php if (!empty($cvData['social']['github'])): ?>
-                        <a href="<?= Html::encode($cvData['social']['github']) ?>" target="_blank" class="text-dark">
-                            <i class="ti ti-brand-github fs-5"></i>
-                        </a>
-                    <?php endif; ?>
-
-                    <?php if (!empty($cvData['social']['portfolio'])): ?>
-                        <a href="<?= Html::encode($cvData['social']['portfolio']) ?>" target="_blank" class="text-success">
-                            <i class="ti ti-world fs-5"></i>
-                        </a>
-                    <?php endif; ?>
-
+                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
 
@@ -56,7 +44,7 @@ use yii\helpers\Html;
             <div class="mt-4">
                 <?= Html::a(
                     '<i class="ti ti-download me-1"></i> Download PDF',
-                    ['cv/download'],
+                    ['cv/download', 'id' => $cvId],   // ✅ ID FIX
                     [
                         'class' => 'btn btn-primary btn-sm',
                         'target' => '_blank'
@@ -110,7 +98,9 @@ use yii\helpers\Html;
 
                                 <p class="text-muted mb-2">
                                     <?= Html::encode($exp['company'] ?? '') ?>
-                                    <?= !empty($exp['duration']) ? ' • ' . Html::encode($exp['duration']) : '' ?>
+                                    <?= !empty($exp['duration'])
+                                        ? ' • ' . Html::encode($exp['duration'])
+                                        : '' ?>
                                 </p>
 
                                 <?php if (!empty($exp['description'])): ?>
@@ -139,7 +129,9 @@ use yii\helpers\Html;
 
                                 <p class="text-muted mb-0">
                                     <?= Html::encode($edu['institute'] ?? '') ?>
-                                    <?= !empty($edu['year']) ? ' • ' . Html::encode($edu['year']) : '' ?>
+                                    <?= !empty($edu['year'])
+                                        ? ' • ' . Html::encode($edu['year'])
+                                        : '' ?>
                                 </p>
                             </div>
                         <?php endforeach; ?>

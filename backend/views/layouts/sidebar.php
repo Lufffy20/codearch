@@ -29,23 +29,16 @@ use yii\helpers\Url;
 
             <ul id="sidebarnav" class="mb-0">
 
-                <!-- Section Title -->
                 <li class="nav-small-cap">
+                    <iconify-icon icon="solar:menu-dots-bold-duotone" class="nav-small-cap-icon fs-5"></iconify-icon>
                     <span class="hide-menu">Home</span>
                 </li>
 
                 <!-- Dashboard Menu Item -->
                 <li class="sidebar-item">
-                    <a
-                        class="sidebar-link sidebar-link primary-hover-bg"
-                        href="<?= Url::to(['/site/index']) ?>"
-                        id="get-url"
-                        aria-expanded="false">
+                    <a class="sidebar-link sidebar-link primary-hover-bg" href="<?= Url::to(['/site/index']) ?>" id="get-url" aria-expanded="false">
                         <span class="aside-icon p-2 bg-primary-subtle rounded-1">
-                            <iconify-icon
-                                icon="solar:screencast-2-line-duotone"
-                                class="fs-6">
-                            </iconify-icon>
+                            <iconify-icon icon="solar:screencast-2-line-duotone" class="fs-6"></iconify-icon>
                         </span>
                         <span class="hide-menu ps-1">Dashboard</span>
                     </a>
@@ -53,18 +46,25 @@ use yii\helpers\Url;
 
                 <!-- CV Menu Item -->
                 <li class="sidebar-item">
-                    <a
-                        class="sidebar-link success-hover-bg"
-                        href="<?= Url::to(['/cv/cv']) ?>">
-                        <span class="aside-icon p-2 bg-success-subtle rounded-1">
-                            <iconify-icon
-                                icon="solar:chart-line-duotone"
-                                class="fs-6">
-                            </iconify-icon>
+                    <a class="sidebar-link has-arrow indigo-hover-bg" href="javascript:void(0)" aria-expanded="false">
+                        <span class="aside-icon p-2 bg-indigo-subtle rounded-1">
+                            <iconify-icon icon="solar:smart-speaker-minimalistic-line-duotone" class="fs-6"></iconify-icon>
                         </span>
                         <span class="hide-menu ps-1">CV</span>
                     </a>
+
+                    <ul aria-expanded="false" class="collapse first-level">
+
+                        <!-- CV View -->
+                        <li class="sidebar-item">
+                            <a href="<?= Url::to(['/cv/index']) ?>" class="sidebar-link">
+                                <span class="sidebar-icon"></span>
+                                <span class="hide-menu">My Cvs</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
+
 
             </ul>
 
