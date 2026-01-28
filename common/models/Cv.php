@@ -4,6 +4,8 @@ namespace common\models;
 
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
+use common\models\CvImage;
+use Yii;
 
 class Cv extends ActiveRecord
 {
@@ -64,6 +66,46 @@ class Cv extends ActiveRecord
         return $this->hasOne(CvTemplate::class, ['id' => 'template_id']);
     }
 
+    // common/models/Cv.php
+
+    public function getImages()
+    {
+        return $this->hasMany(CvImage::class, ['cv_id' => 'id']);
+    }
+
+    public function getProfileImage()
+    {
+        return $this->hasOne(CvImage::class, ['cv_id' => 'id'])
+            ->andWhere(['type' => 'profile']);
+    }
+
+    public function getAchievements()
+    {
+        return $this->hasMany(Achievement::class, ['cv_id' => 'id']);
+    }
+
+    public function getProjects()
+    {
+        return $this->hasMany(Project::class, ['cv_id' => 'id']);
+    }
+
+    public function getLanguages()
+    {
+        return $this->hasMany(Language::class, ['cv_id' => 'id']);
+    }
+
+    public function getAwards()
+    {
+        return $this->hasMany(Award::class, ['cv_id' => 'id']);
+    }
+
+    public function getCourses()
+    {
+        return $this->hasMany(Course::class, ['cv_id' => 'id']);
+    }
+
+
+
     /* ================= HELPERS ================= */
 
     public function shouldUseTemplate(bool $force = false): bool
@@ -100,6 +142,36 @@ class Cv extends ActiveRecord
                 $this->skills
             ),
 
+            'projects' => array_map(
+                fn($p) => $p->toArrayProject(),
+                $this->projects
+            ),
+
+            'achievements' => array_map(
+                fn($a) => $a->toArrayAchievement(),
+                $this->achievements
+            ),
+
+            'languages' => array_map(
+                fn($l) => $l->toArrayLanguage(),
+                $this->languages
+            ),
+
+            'awards' => array_map(
+                fn($a) => [
+                    'title' => $a->title,
+                    'year'  => $a->year
+                ],
+                $this->awards
+            ),
+
+            'courses' => array_map(
+                fn($c) => [
+                    'name' => $c->title,
+                ],
+                $this->courses
+            ),
+
             'social' => array_map(
                 fn($s) => [
                     'platform' => $s->platform,
@@ -107,6 +179,12 @@ class Cv extends ActiveRecord
                 ],
                 $this->socials
             ),
+
+            'image' => [
+                'profile' => $this->profileImage
+                    ? Yii::getAlias('@web') . $this->profileImage->image_path
+                    : ''
+            ],
         ];
     }
 
@@ -153,7 +231,17 @@ class Cv extends ActiveRecord
             $placeholder = '{{' . ($prefix ? $prefix . '.' : '') . $key . '}}';
 
             if (is_array($value)) {
-                if (in_array($key, ['education', 'experience', 'skills', 'social'], true)) {
+                if (in_array($key, [
+                    'education',
+                    'experience',
+                    'skills',
+                    'social',
+                    'projects',
+                    'achievements',
+                    'languages',
+                    'awards',
+                    'courses'
+                ], true)) {
                     $template = $this->processLoop($template, $key, $value);
                 } else {
                     $template = $this->replacePlaceholders($template, $value, $key);
@@ -174,6 +262,11 @@ class Cv extends ActiveRecord
     private function processLoop(string $template, string $section, array $items): string
     {
         $pattern = '/\{\{' . $section . '\.loop\}\}(.*?)\{\{' . $section . '\.endloop\}\}/s';
+
+        // 🔴 Agar section empty hai → pura block hata do
+        if (empty($items)) {
+            return preg_replace($pattern, '', $template);
+        }
 
         if (!preg_match($pattern, $template, $matches)) {
             return $template;

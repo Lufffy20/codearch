@@ -1,97 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{personal.name}} - CV</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .page {
+            width: 100%;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 14px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
+            margin-top: 20px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .contact {
+            font-size: 11px;
+        }
+
+        .section {
+            margin-top: 15px;
+        }
+
+        .item {
+            margin-bottom: 10px;
+        }
+
+        .small {
+            font-size: 11px;
+            color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td {
+            vertical-align: top;
+            padding: 4px 0;
+        }
+
+        .skills span {
+            display: inline-block;
+            border: 1px solid #000;
+            padding: 2px 6px;
+            margin: 2px;
+            font-size: 11px;
+        }
+    </style>
 </head>
 
-<body class="bg-light">
-
-    <div class="container my-5">
+<body>
+    <div class="page">
 
         <!-- HEADER -->
-        <div class="text-center border-bottom pb-4 mb-5">
-            <h1 class="fw-bold">{{personal.name}}</h1>
-            <h4 class="text-secondary mb-3">{{personal.role}}</h4>
-
-            <div class="d-flex justify-content-center flex-wrap gap-4 text-muted">
-                <span>Email: {{personal.email}}</span>
-                <span>Phone: {{personal.phone}}</span>
-                <span>Location: {{personal.location}}</span>
-            </div>
+        <div class="header">
+            <h1>{{personal.name}}</h1>
+            <p><strong>{{personal.role}}</strong></p>
+            <p class="contact">
+                {{personal.email}} | {{personal.phone}} | {{personal.location}}
+            </p>
         </div>
 
         <!-- SUMMARY -->
-        <!-- <div class="mb-4">
-            <h5 class="border-bottom pb-2 mb-3 fw-bold">Summary</h5>
+        <div class="section">
+            <h2>Profile Summary</h2>
             <p>{{personal.summary}}</p>
-        </div> -->
+        </div>
 
         <!-- EXPERIENCE -->
-        <div class="mb-4">
-            <h5 class="border-bottom pb-2 mb-3 fw-bold">Experience</h5>
-
-            {{experience.loop}}
-            <div class="mb-3">
-                <div class="d-flex justify-content-between">
-                    <strong>{{experience.position}}</strong>
-                    <span class="text-muted">{{experience.duration}}</span>
-                </div>
-                <div class="fst-italic text-secondary">{{experience.company}}</div>
-                <p class="mb-0">{{experience.description}}</p>
+        {{experience.loop}}
+        <div class="section">
+            <h2>Work Experience</h2>
+            <div class="item">
+                <strong>{{experience.position}}</strong><br>
+                <span class="small">{{experience.company}} | {{experience.duration}}</span>
+                <p>{{experience.description}}</p>
             </div>
-            {{experience.endloop}}
         </div>
+        {{experience.endloop}}
+
+        <!-- PROJECTS -->
+        {{projects.loop}}
+        <div class="section">
+            <h2>Projects</h2>
+            <div class="item">
+                <strong>{{projects.title}}</strong>
+                <p>{{projects.description}}</p>
+                <p class="small">Tech: {{projects.tech}}</p>
+            </div>
+        </div>
+        {{projects.endloop}}
 
         <!-- EDUCATION -->
-        <div class="mb-4">
-            <h5 class="border-bottom pb-2 mb-3 fw-bold">Education</h5>
-
-            {{education.loop}}
-            <div class="mb-3">
-                <div class="d-flex justify-content-between">
-                    <strong>{{education.degree}}</strong>
-                    <span class="text-muted">{{education.year}}</span>
-                </div>
-                <div class="fst-italic text-secondary">{{education.institute}}</div>
+        {{education.loop}}
+        <div class="section">
+            <h2>Education</h2>
+            <div class="item">
+                <strong>{{education.degree}}</strong><br>
+                <span class="small">{{education.institute}} ({{education.year}})</span>
             </div>
-            {{education.endloop}}
         </div>
+        {{education.endloop}}
 
         <!-- SKILLS -->
-        <div class="mb-4">
-            <h5 class="border-bottom pb-2 mb-3 fw-bold">Skills</h5>
-
-            <div class="d-flex flex-wrap gap-2">
+        <div class="section">
+            <h2>Skills</h2>
+            <div class="skills">
                 {{skills.loop}}
-                <span class="">
-                    {{skills.name}}
-                </span>
+                <span>{{skills.name}}</span>
                 {{skills.endloop}}
-
             </div>
         </div>
 
-        <!-- SOCIAL LINKS -->
-        <div class="mb-4">
-            <h5 class="border-bottom pb-2 mb-3 fw-bold">Social Links</h5>
+        <!-- LANGUAGES -->
+        <div class="section">
+            <h2>Languages</h2>
+            {{languages.loop}}
+            <p>{{languages.name}} - {{languages.level}}</p>
+            {{languages.endloop}}
+        </div>
 
+        <!-- AWARDS -->
+        {{awards.loop}}
+        <div class="section">
+            <h2>Awards</h2>
+            <p>{{awards.title}}</p>
+        </div>
+        {{awards.endloop}}
+
+        <!-- COURSES -->
+        {{courses.loop}}
+        <div class="section">
+            <h2>Courses & Certifications</h2>
+            <p>{{courses.name}}</p>
+        </div>
+        {{courses.endloop}}
+
+        <!-- SOCIAL -->
+        <div class="section">
+            <h2>Social Links</h2>
             {{social.loop}}
-            <div>
-                <a href="{{social.url}}" target="_blank" class="text-decoration-none">
-                    {{social.platform}}
-                </a>
-            </div>
+            <p>{{social.platform}} : {{social.url}}</p>
             {{social.endloop}}
         </div>
 
     </div>
-
 </body>
 
 </html>

@@ -13,9 +13,16 @@ use common\models\{
     Experience,
     Skill,
     Social,
-    CvTemplate
+    CvTemplate,
+    Project,
+    Achievement,
+    Language,
+    Award,
+    Course
 };
 use common\services\CvService;
+use yii\web\UploadedFile;
+use common\models\CvImage;
 
 class CvController extends Controller
 {
@@ -104,7 +111,6 @@ class CvController extends Controller
                 ->where(['is_active' => true])
                 ->orderBy(['id' => SORT_ASC])
                 ->scalar(),
-
         ]);
 
         $personal  = new PersonalDetails();
@@ -116,6 +122,14 @@ class CvController extends Controller
             $personal->load(Yii::$app->request->post()) &&
             CvService::saveCv($cv, $personal, Yii::$app->request->post())
         ) {
+
+            /* ================= PROFILE IMAGE UPLOAD ================= */
+
+            $image = UploadedFile::getInstanceByName('profile_image');
+            CvImage::handleProfileImageUpload($cv->id, $image);
+
+            /* ================= END IMAGE ================= */
+
             Yii::$app->session->setFlash('success', 'CV created successfully 🎉');
             return $this->redirect(['templates', 'id' => $cv->id]);
         }
@@ -127,7 +141,12 @@ class CvController extends Controller
             'educations',
             'experiences',
             'skills',
-            'socials'
+            'socials',
+            'projects',
+            'achievements',
+            'languages',
+            'awards',
+            'courses'
         ));
     }
 
@@ -148,6 +167,24 @@ class CvController extends Controller
             $personal->load(Yii::$app->request->post()) &&
             CvService::saveCv($cv, $personal, Yii::$app->request->post(), true)
         ) {
+
+            /* ================= PROFILE IMAGE LOGIC ================= */
+
+            $image  = UploadedFile::getInstanceByName('profile_image');
+            $remove = Yii::$app->request->post('remove_profile_image');
+
+            // Remove image if requested
+            if ($remove) {
+                CvImage::removeProfileImage($cv->id);
+            }
+
+            // Upload new image if provided
+            if ($image) {
+                CvImage::handleProfileImageUpload($cv->id, $image);
+            }
+
+            /* ================= END IMAGE ================= */
+
             Yii::$app->session->setFlash('success', 'CV updated successfully 🎉');
             return $this->refresh();
         }
@@ -159,9 +196,18 @@ class CvController extends Controller
             'educations',
             'experiences',
             'skills',
-            'socials'
+            'socials',
+
+            // ✅ NEW
+            'projects',
+            'achievements',
+            'languages',
+            'awards',
+            'courses'
         ));
     }
+
+
 
     /* ================= TEMPLATE SELECT ================= */
 
@@ -178,7 +224,7 @@ class CvController extends Controller
 
             $cv->updateAttributes(['template_id' => $templateId]);
             Yii::$app->session->setFlash('success', 'Template updated successfully!');
-            return $this->redirect(['cv', 'id' => $cv->id, 'template' => 1]);
+            return $this->redirect(['templates', 'id' => $cv->id]);
         }
 
         return $this->render('templates', compact('cv', 'templates'));
@@ -217,7 +263,19 @@ class CvController extends Controller
 
     private function findUserCv($id, bool $withTemplate = true): Cv
     {
-        $relations = ['personalDetails', 'educations', 'experiences', 'skills', 'socials'];
+        $relations = [
+            'personalDetails',
+            'educations',
+            'experiences',
+            'skills',
+            'socials',
+            'projects',
+            'achievements',
+            'languages',
+            'awards',
+            'courses',
+        ];
+
         if ($withTemplate) {
             $relations[] = 'template';
         }
@@ -236,18 +294,31 @@ class CvController extends Controller
 
     private function getFormCollections(?int $cvId = null): array
     {
-        $educations  = $cvId ? Education::findAll(['cv_id' => $cvId]) : [];
-        $experiences = $cvId ? Experience::findAll(['cv_id' => $cvId]) : [];
-        $skills      = $cvId ? Skill::findAll(['cv_id' => $cvId]) : [];
-        $socials     = $cvId ? Social::findAll(['cv_id' => $cvId]) : [];
+        $educations   = $cvId ? Education::findAll(['cv_id' => $cvId]) : [];
+        $experiences  = $cvId ? Experience::findAll(['cv_id' => $cvId]) : [];
+        $skills       = $cvId ? Skill::findAll(['cv_id' => $cvId]) : [];
+        $socials      = $cvId ? Social::findAll(['cv_id' => $cvId]) : [];
+
+        $projects     = $cvId ? Project::findAll(['cv_id' => $cvId]) : [];
+        $achievements = $cvId ? Achievement::findAll(['cv_id' => $cvId]) : [];
+        $languages    = $cvId ? Language::findAll(['cv_id' => $cvId]) : [];
+        $awards       = $cvId ? Award::findAll(['cv_id' => $cvId]) : [];
+        $courses      = $cvId ? Course::findAll(['cv_id' => $cvId]) : [];
 
         return [
-            'educations'  => $this->withAtLeastOne($educations, Education::class),
-            'experiences' => $this->withAtLeastOne($experiences, Experience::class),
-            'skills'      => $this->withAtLeastOne($skills, Skill::class),
-            'socials'     => $this->withAtLeastOne($socials, Social::class),
+            'educations'   => $this->withAtLeastOne($educations, Education::class),
+            'experiences'  => $this->withAtLeastOne($experiences, Experience::class),
+            'skills'       => $this->withAtLeastOne($skills, Skill::class),
+            'socials'      => $this->withAtLeastOne($socials, Social::class),
+
+            'projects'     => $this->withAtLeastOne($projects, Project::class),
+            'achievements' => $this->withAtLeastOne($achievements, Achievement::class),
+            'languages'    => $this->withAtLeastOne($languages, Language::class),
+            'awards'       => $this->withAtLeastOne($awards, Award::class),
+            'courses'      => $this->withAtLeastOne($courses, Course::class),
         ];
     }
+
 
     private function withAtLeastOne(array $models, string $class)
     {
@@ -257,16 +328,63 @@ class CvController extends Controller
 
     private function downloadPdf(string $html, string $filename)
     {
-        $mpdf = new Mpdf([
-            'format'        => 'A4',
-            'margin_top'    => 10,
-            'margin_bottom' => 10,
-            'tempDir'       => Yii::getAlias('@runtime/mpdf'),
+        $mpdf = new \Mpdf\Mpdf([
+            'mode'           => 'utf-8',
+            'format'         => 'A4',
+            'margin_top'     => 10,
+            'margin_bottom'  => 10,
+            'margin_left'    => 10,
+            'margin_right'   => 10,
+            'tempDir'        => Yii::getAlias('@runtime/mpdf'),
+            'default_font'   => 'dejavusans',
         ]);
+
 
         $mpdf->WriteHTML($html);
         return $mpdf->Output($filename, \Mpdf\Output\Destination::DOWNLOAD);
     }
+
+    /* ================= IMPORT ================= */
+
+    public function actionImport()
+    {
+        $cv = new Cv([
+            'user_id' => Yii::$app->user->id,
+            'template_id' => CvTemplate::find()
+                ->select('id')
+                ->where(['is_active' => true])
+                ->orderBy(['id' => SORT_ASC])
+                ->scalar(),
+        ]);
+
+        $templates = CvTemplate::getActiveTemplates();
+
+        if (Yii::$app->request->isPost) {
+
+            $file = UploadedFile::getInstanceByName('resume_file');
+
+            if ($file && $file->error === UPLOAD_ERR_OK) {
+                try {
+                    $import = \common\services\ResumeImportService::import($file);
+
+                    $cv->title = $import['cv']->title;
+                    $personal  = $import['personal'];
+
+                    return $this->render('create', array_merge(
+                        $import,
+                        compact('cv', 'templates')
+                    ));
+                } catch (\Throwable $e) {
+                    Yii::$app->session->setFlash('error', $e->getMessage());
+                }
+            } else {
+                Yii::$app->session->setFlash('error', 'Invalid resume file.');
+            }
+        }
+
+        return $this->render('import', compact('cv', 'templates'));
+    }
+
 
     /* ================= THUMBNAIL ================= */
 

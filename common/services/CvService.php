@@ -9,7 +9,12 @@ use common\models\{
     Education,
     Experience,
     Skill,
-    Social
+    Social,
+    Project,
+    Achievement,
+    Language,
+    Award,
+    Course
 };
 
 class CvService
@@ -37,6 +42,13 @@ class CvService
             self::saveMultiple(Experience::class, 'Experience', $cv->id, $post, ['company', 'description']);
             self::saveMultiple(Skill::class, 'Skill', $cv->id, $post, ['name']);
             self::saveMultiple(Social::class, 'Social', $cv->id, $post, ['platform', 'url']);
+
+            // ✅ NEW SECTIONS
+            self::saveMultiple(Project::class, 'Project', $cv->id, $post, ['title']);
+            self::saveMultiple(Achievement::class, 'Achievement', $cv->id, $post, ['title']);
+            self::saveMultiple(Language::class, 'Language', $cv->id, $post, ['name']);
+            self::saveMultiple(Award::class, 'Award', $cv->id, $post, ['title']);
+            self::saveMultiple(Course::class, 'Course', $cv->id, $post, ['title']);
 
             $transaction->commit();
             return true;

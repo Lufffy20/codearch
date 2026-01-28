@@ -13,12 +13,24 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="cv-update">
 
     <?= $this->render('_form', [
-        'cv' => $cv,
-        'personal' => $personal,
-        'educations' => $educations,
-        'experiences' => $experiences,
-        'skills' => $skills,
-        'socials' => $socials,
+        'cv'           => $cv,
+        'personal'     => $personal,
+
+        // Existing sections
+        'educations'   => $educations,
+        'experiences'  => $experiences,
+        'skills'       => $skills,
+        'socials'      => $socials,
+
+        // ✅ NEW ADD-MORE SECTIONS
+        'projects'     => $projects,
+        'achievements' => $achievements,
+        'languages'    => $languages,
+        'awards'       => $awards,
+        'courses'      => $courses,
+
+        // Templates (agar use ho raha ho)
+        'templates'    => $templates ?? [],
     ]) ?>
 
 </div>

@@ -11,12 +11,32 @@ if ((at = "vertical")) {
       : document.location.href;
 
   var current_link = document.getElementById("get-url");
-  if (currentNewURL.includes("/main/index.html")) {
-    current_link.setAttribute("href", "../main/index.html");
-  } else if (currentNewURL.includes("/index.html")) {
-    current_link.setAttribute("href", "./index.html");
-  } else {
-    current_link.setAttribute("href", "./");
+  // Only modify the href if it's pointing to static HTML files, not dynamic routes
+  if (current_link) {
+    var originalHref = current_link.getAttribute("data-original-href") || current_link.getAttribute("href");
+
+    // Store the original href to preserve it
+    if (!current_link.hasAttribute("data-original-href")) {
+      current_link.setAttribute("data-original-href", current_link.getAttribute("href"));
+    }
+
+    // Only change href if it's pointing to static HTML files, not Yii2 routes
+    if (originalHref.includes("/main/index.html")) {
+      if (currentNewURL.includes("/main/index.html")) {
+        current_link.setAttribute("href", "../main/index.html");
+      } else {
+        current_link.setAttribute("href", "./index.html");
+      }
+    } else if (originalHref.includes("/index.html")) {
+      if (currentNewURL.includes("/index.html")) {
+        current_link.setAttribute("href", "./index.html");
+      } else {
+        current_link.setAttribute("href", "./");
+      }
+    } else {
+      // For dynamic routes (like Yii2 routes), preserve the original href
+      current_link.setAttribute("href", originalHref);
+    }
   }
   // end
 

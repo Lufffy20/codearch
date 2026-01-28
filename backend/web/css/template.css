@@ -1,0 +1,71 @@
+/* ================= TEMPLATE ITEM ================= */
+.cv-template-item {
+    text-align: center;
+}
+
+/* ================= PAPER (REAL GRID SIZE) ================= */
+/* NOTE: width/height = A4 × scale (0.22) */
+.cv-paper {
+    width: 175px;
+    /* 794 × 0.22 */
+    height: 247px;
+    /* 1123 × 0.22 */
+
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .18);
+
+    margin: 0 auto 10px;
+    overflow: hidden;
+
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+/* Hover zoom (safe for grid) */
+.cv-template-item:hover .cv-paper {
+    transform: scale(1.08);
+    box-shadow: 0 26px 60px rgba(0, 0, 0, .25);
+}
+
+/* ================= IFRAME (REAL A4 SCALED INSIDE) ================= */
+.cv-paper iframe {
+    width: 794px;
+    /* REAL A4 width */
+    height: 1123px;
+    /* REAL A4 height */
+    border: none;
+
+    transform: scale(0.22);
+    transform-origin: top left;
+
+    pointer-events: none;
+}
+
+/* ================= TEMPLATE NAME ================= */
+.cv-template-footer {
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 6px;
+    color: #444;
+}
+
+/* ================= ACTIONS ================= */
+.cv-template-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 8px;
+
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+
+.cv-template-item:hover .cv-template-actions {
+    opacity: 1;
+}
+
+/* ================= ACTIVE TEMPLATE ================= */
+.cv-template-item.active .cv-paper {
+    outline: 3px solid #0d6efd;
+    outline-offset: 6px;
+}

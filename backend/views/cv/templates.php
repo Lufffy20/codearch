@@ -26,15 +26,15 @@ $this->title = 'Choose Template for ' . Html::encode($cv->title);
     </div>
 
     <!-- Templates Grid -->
-    <div class="row g-4">
+    <div class="row g-5">
         <?php foreach ($templates as $template): ?>
-            <div class="col-xl-4 col-lg-6 col-md-6">
+            <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
 
-                <div class="cv-template-card
-                    <?= $cv->template_id == $template->id ? 'active' : '' ?>">
 
-                    <!-- 🔥 LIVE CV THUMBNAIL -->
-                    <div class="cv-preview">
+                <div class="cv-template-item <?= $cv->template_id == $template->id ? 'active' : '' ?>">
+
+                    <!-- TEMPLATE ITSELF (NO CARD BOX) -->
+                    <div class="cv-paper">
                         <iframe
                             src="<?= Url::to([
                                         'thumbnail',
@@ -52,7 +52,6 @@ $this->title = 'Choose Template for ' . Html::encode($cv->title);
 
                     <!-- ACTIONS -->
                     <div class="cv-template-actions">
-
                         <?= Html::a(
                             'Preview',
                             ['preview', 'id' => $cv->id, 'template_id' => $template->id],
@@ -80,15 +79,17 @@ $this->title = 'Choose Template for ' . Html::encode($cv->title);
                         ) ?>
 
                         <?= Html::a(
-                            'Download',
+                            '<i class="ti ti-download"></i>',
                             ['download', 'id' => $cv->id, 'template_id' => $template->id],
                             [
                                 'class' => 'btn btn-outline-success btn-sm',
+                                'title' => 'Download',
                                 'data-pjax' => 0
                             ]
                         ) ?>
 
                     </div>
+
                 </div>
 
             </div>
@@ -114,87 +115,3 @@ $this->title = 'Choose Template for ' . Html::encode($cv->title);
         </div>
     </div>
 </div>
-
-<?php
-$js = <<<JS
-$(document).on('click', '.preview-btn', function(e) {
-    e.preventDefault();
-    const url = $(this).attr('href');
-
-    $('#preview-content').html(`
-        <div class="text-center py-5">
-            <div class="spinner-border"></div>
-            <p class="mt-2 text-muted">Loading preview…</p>
-        </div>
-    `);
-
-    $.get(url)
-        .done(function(data) {
-            $('#preview-content').html(data);
-        })
-        .fail(function() {
-            $('#preview-content').html(
-                '<div class="alert alert-danger">Failed to load preview</div>'
-            );
-        });
-});
-JS;
-
-$this->registerJs($js);
-?>
-
-<style>
-    .cv-preview {
-        height: 360px;
-        background: #f4f4f4;
-        overflow: hidden;
-        position: relative;
-    }
-
-    /* ✅ FIXED IFRAME */
-    .cv-preview iframe {
-        width: 794px;
-        /* A4 width */
-        height: 1123px;
-        /* A4 height */
-        border: none;
-
-        position: absolute;
-        top: 10px;
-        left: 50%;
-
-        transform: translateX(-50%) scale(0.23);
-        transform-origin: top center;
-
-        pointer-events: none;
-    }
-
-    .cv-template-card {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, .06);
-        overflow: hidden;
-        transition: .25s ease;
-        max-width: 340px;
-        margin: auto;
-    }
-
-    .cv-template-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 14px 40px rgba(0, 0, 0, .12);
-    }
-
-    .cv-template-footer {
-        padding: 10px;
-        text-align: center;
-        font-weight: 600;
-        border-top: 1px solid #eee;
-    }
-
-    .cv-template-actions {
-        display: flex;
-        gap: 10px;
-        padding: 12px;
-        justify-content: center;
-    }
-</style>

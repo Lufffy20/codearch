@@ -20,8 +20,17 @@
                 <div class="card shadow-sm border-0">
 
                     <!-- HEADER -->
+                    <!-- HEADER -->
                     <div class="card-body text-center text-white"
                         style="background: linear-gradient(135deg, #667eea, #764ba2);">
+
+                        <!-- PROFILE IMAGE -->
+                        <img src="{{image.profile}}"
+                            alt="Profile Photo"
+                            style="width:120px;height:120px;object-fit:cover;border-radius:50%;
+                border:3px solid rgba(255,255,255,0.6);margin-bottom:15px;"
+                            onerror="this.style.display='none'">
+
                         <h1 class="fw-bold mb-1">{{personal.name}}</h1>
                         <h5 class="fw-normal mb-4">{{personal.role}}</h5>
 
@@ -43,6 +52,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <!-- CONTENT -->
                     <div class="card-body p-4">
