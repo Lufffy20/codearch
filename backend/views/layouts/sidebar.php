@@ -36,7 +36,7 @@ use yii\helpers\Url;
 
                 <!-- Dashboard Menu Item -->
                 <li class="sidebar-item">
-                    <a class="sidebar-link sidebar-link primary-hover-bg" href="<?= Url::to(['/site/index']) ?>" id="get-url" aria-expanded="false">
+                    <a class="sidebar-link sidebar-link primary-hover-bg" href="<?= Url::to(['/site/index']) ?>" aria-expanded="false">
                         <span class="aside-icon p-2 bg-primary-subtle rounded-1">
                             <iconify-icon icon="solar:screencast-2-line-duotone" class="fs-6"></iconify-icon>
                         </span>
@@ -60,6 +60,13 @@ use yii\helpers\Url;
                             <a href="<?= Url::to(['/cv/index']) ?>" class="sidebar-link">
                                 <span class="sidebar-icon"></span>
                                 <span class="hide-menu">My Cvs</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a href="<?= Url::to(['/cv/create']) ?>" class="sidebar-link">
+                                <span class="sidebar-icon"></span>
+                                <span class="hide-menu">Create Cvs</span>
                             </a>
                         </li>
                     </ul>

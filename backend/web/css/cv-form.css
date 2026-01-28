@@ -1,0 +1,492 @@
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: #eff6ff;
+    --border-color: #e5e7eb;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --bg-hover: #f9fafb;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+}
+
+/* Main Container */
+.cv-form-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Header Section */
+.cv-form-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cv-form-header h5 {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cv-form-header h5 i {
+    font-size: 24px;
+}
+
+.cv-form-header .btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.cv-form-header .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Vertical Tabs Wrapper */
+.vertical-tabs-wrapper {
+    display: flex;
+    gap: 0;
+    min-height: 600px;
+}
+
+/* Vertical Navigation - Left Sidebar */
+.nav-tabs-vertical {
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 1px solid var(--border-color);
+    min-width: 240px;
+    max-width: 240px;
+    background: #f8fafc;
+    padding: 16px 0;
+}
+
+.nav-tabs-vertical .nav-item {
+    margin-bottom: 4px;
+}
+
+.nav-tabs-vertical .nav-link {
+    border: none;
+    border-left: 3px solid transparent;
+    border-radius: 0;
+    text-align: left;
+    padding: 14px 24px;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.nav-tabs-vertical .nav-link:hover {
+    background: var(--bg-hover);
+    color: var(--primary-color);
+    border-left-color: var(--primary-light);
+}
+
+.nav-tabs-vertical .nav-link.active {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.nav-tabs-vertical .nav-link.active::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--primary-color);
+}
+
+.nav-tabs-vertical .nav-link i {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Tab Content Area */
+.tab-content-vertical {
+    flex: 1;
+    padding: 32px;
+    background: #ffffff;
+}
+
+/* Section Headers */
+.section-header {
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h6 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 4px 0 0 0;
+}
+
+/* Form Fields */
+.form-label {
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    font-size: 13px !important;
+    margin-bottom: 6px !important;
+}
+
+.form-control {
+    border: 1.5px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+.form-control::placeholder {
+    color: #9ca3af;
+}
+
+/* Profile Photo Section */
+.profile-photo-section {
+    background: var(--bg-hover);
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.profile-photo-section:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+}
+
+.profile-preview-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-preview-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Entry Cards */
+.entry-card {
+    background: #ffffff;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.entry-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.entry-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.entry-number {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Skills Grid */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.skill-item {
+    position: relative;
+}
+
+.skill-item .remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.skill-item:hover .remove-btn {
+    opacity: 1;
+}
+
+/* Buttons */
+.btn-add {
+    background: transparent;
+    border: 2px dashed var(--primary-color);
+    color: var(--primary-color);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-add:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-hover);
+    color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.btn-remove {
+    background: transparent;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-remove:hover {
+    background: var(--danger-color);
+    color: #ffffff;
+}
+
+.btn-primary-custom {
+    background: var(--primary-color);
+    border: none;
+    color: #ffffff;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-success-custom {
+    background: var(--success-color);
+    border: none;
+    color: #ffffff;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-success-custom:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Form Footer */
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    background: var(--bg-hover);
+    border-top: 1px solid var(--border-color);
+    gap: 16px;
+}
+
+/* Help Text */
+.help-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.help-text i {
+    font-size: 14px;
+}
+
+/* Error Messages */
+.text-danger {
+    font-size: 12px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: var(--border-color);
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Divider */
+.divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 24px 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 992px) {
+    .vertical-tabs-wrapper {
+        flex-direction: column;
+    }
+
+    .nav-tabs-vertical {
+        flex-direction: row;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        min-width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 8px;
+        background: #ffffff;
+    }
+
+    .nav-tabs-vertical .nav-link {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        padding: 12px 16px;
+        white-space: nowrap;
+    }
+
+    .nav-tabs-vertical .nav-link.active {
+        border-left: none;
+        border-bottom-color: var(--primary-color);
+    }
+
+    .nav-tabs-vertical .nav-link.active::after {
+        display: none;
+    }
+
+    .tab-content-vertical {
+        padding: 20px;
+    }
+
+    .cv-form-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .form-footer {
+        flex-direction: column;
+    }
+
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .cv-form-header {
+        padding: 16px;
+    }
+
+    .tab-content-vertical {
+        padding: 16px;
+    }
+
+    .entry-card {
+        padding: 16px;
+    }
+}
+
+/* Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tab-pane.active {
+    animation: slideIn 0.3s ease;
+}

@@ -14,11 +14,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'cv' => $cv,
-        'personal' => $personal, 
+        'personal' => $personal,
         'educations' => $educations,
         'experiences' => $experiences,
         'skills' => $skills,
         'socials' => $socials,
+        'projects' => $projects,
+        'achievements' => $achievements,
+        'languages' => $languages,
+        'awards' => $awards,
+        'courses' => $courses,
     ]) ?>
+
 
 </div>

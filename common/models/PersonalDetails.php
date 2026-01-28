@@ -14,6 +14,8 @@ use Yii;
  * @property string $email
  * @property string $phone
  * @property string $location
+ * @property string $address
+ * @property string $summary
  * @property int $created_at
  * @property int $updated_at
  */
@@ -33,13 +35,17 @@ class PersonalDetails extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+
             // REQUIRED FIELDS
             [['name', 'role', 'email'], 'required'],
 
             // DATA TYPES
             [['cv_id', 'created_at', 'updated_at'], 'integer'],
 
-            // STRING LENGTH
+            // LONG TEXT FIELDS
+            [['address', 'summary'], 'string'],
+
+            // STRING LENGTH (short fields)
             [['name', 'role', 'email', 'phone', 'location'], 'string', 'max' => 255],
 
             // EMAIL FORMAT
@@ -49,6 +55,7 @@ class PersonalDetails extends \yii\db\ActiveRecord
             [['phone'], 'match', 'pattern' => '/^[0-9+\-\s]{8,15}$/'],
         ];
     }
+
 
 
     /**
@@ -64,6 +71,8 @@ class PersonalDetails extends \yii\db\ActiveRecord
             'email' => 'Email',
             'phone' => 'Phone',
             'location' => 'Location',
+            'address' => 'Address',
+            'summary' => 'Summary',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -98,6 +107,8 @@ class PersonalDetails extends \yii\db\ActiveRecord
             'email' => $this->email,
             'phone' => $this->phone,
             'location' => $this->location,
+            'address' => $this->address,
+            'summary' => $this->summary,
         ];
     }
 }
