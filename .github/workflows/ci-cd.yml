@@ -133,16 +133,22 @@ jobs:
           YII_ENV: test
 
       # -------------------------
-      # ✅ RUN TESTS - SEPARATE SUITES
+      # ✅ RUN TESTS - YII2 ADVANCED STRUCTURE
       # -------------------------
       - name: Run common unit tests
-        run: vendor/bin/codecept run common
+        run: |
+          cd common/tests
+          ../../vendor/bin/codecept run unit
         continue-on-error: false
 
       - name: Run frontend tests
-        run: vendor/bin/codecept run frontend
+        run: |
+          cd frontend/tests
+          ../../vendor/bin/codecept run
         continue-on-error: false
 
       - name: Run backend tests
-        run: vendor/bin/codecept run backend
+        run: |
+          cd backend/tests
+          ../../vendor/bin/codecept run
         continue-on-error: false
