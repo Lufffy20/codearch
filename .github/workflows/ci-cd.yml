@@ -1,1 +1,34 @@
+name: Yii2 CI Pipeline
 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo, pdo_mysql
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Set permissions
+        run: |
+          chmod -R 777 backend/runtime
+          chmod -R 777 frontend/runtime
+          chmod -R 777 common/runtime
+
+      - name: Run tests
+        run: vendor/bin/codecept run
