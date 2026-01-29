@@ -45,6 +45,9 @@ jobs:
 
       - name: Run Codeception tests
         run: |
-          vendor/bin/codecept run common
-          vendor/bin/codecept run backend
-          vendor/bin/codecept run frontend
+          cd common
+          ../vendor/bin/codecept run
+          cd ../backend
+          ../vendor/bin/codecept run
+          cd ../frontend
+          ../vendor/bin/codecept run
