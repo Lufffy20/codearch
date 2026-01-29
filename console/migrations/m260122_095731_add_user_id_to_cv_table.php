@@ -12,21 +12,36 @@ class m260122_095731_add_user_id_to_cv_table extends Migration
      */
     public function safeUp()
     {
-        // Step 1: user_id column (pehle NULL allow)
-        $this->addColumn(
-            '{{%cv}}',
-            'user_id',
-            $this->integer()->null()->after('id')
-        );
+        // 1. Add column (nullable)
+        $this->addColumn('{{%cv}}', 'user_id', $this->integer()->null()->after('id'));
 
-        // Step 2: existing data ke liye default user assign karo
-        // NOTE: 1 ko apne existing admin/user ID se replace kar sakte ho
-        $this->update('{{%cv}}', ['user_id' => 2]);
+        // 2. Ensure at least ONE user exists
+        $userId = (new \yii\db\Query())
+            ->from('{{%user}}')
+            ->select('id')
+            ->scalar();
 
-        // Step 3: ab NOT NULL karo
+        if (!$userId) {
+            $this->insert('{{%user}}', [
+                'username' => 'system',
+                'auth_key' => Yii::$app->security->generateRandomString(),
+                'password_hash' => Yii::$app->security->generatePasswordHash('password'),
+                'email' => 'system@example.com',
+                'status' => 10,
+                'created_at' => time(),
+                'updated_at' => time(),
+            ]);
+
+            $userId = $this->db->getLastInsertID();
+        }
+
+        // 3. Update existing CV rows
+        $this->update('{{%cv}}', ['user_id' => $userId]);
+
+        // 4. Make NOT NULL
         $this->alterColumn('{{%cv}}', 'user_id', $this->integer()->notNull());
 
-        // Step 4: foreign key
+        // 5. Add FK
         $this->addForeignKey(
             'fk-cv-user_id',
             '{{%cv}}',
