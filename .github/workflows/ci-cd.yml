@@ -118,6 +118,16 @@ jobs:
           chmod -R 777 backend/runtime backend/web/assets
 
       # -------------------------
+      # Initialize Codeception
+      # -------------------------
+      - name: Initialize Codeception tests
+        run: |
+          # Initialize tests if codeception.yml doesn't exist
+          cd common && php ../vendor/bin/codecept build
+          cd ../frontend && php ../vendor/bin/codecept build
+          cd ../backend && php ../vendor/bin/codecept build
+
+      # -------------------------
       # DB Migrations
       # -------------------------
       - name: Run migrations
@@ -135,11 +145,14 @@ jobs:
       # -------------------------
       # ✅ RUN TESTS - YII2 ADVANCED STRUCTURE
       # -------------------------
+      - name: Run common tests
+        run: vendor/bin/codecept run -c common
+        continue-on-error: false
 
       - name: Run frontend tests
-        run: |
-           vendor/bin/codecept run -- -c frontend     
+        run: vendor/bin/codecept run -c frontend
+        continue-on-error: false
 
       - name: Run backend tests
-        run: |
-           vendor/bin/codecept run -- -c backend     
+        run: vendor/bin/codecept run -c backend
+        continue-on-error: false
