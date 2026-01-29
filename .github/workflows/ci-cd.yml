@@ -46,6 +46,7 @@ jobs:
 
       - name: Create Codeception local configs
         run: |
+          # Create database config without invalid 'components' property
           echo '<?php return [
             "class" => "yii\db\Connection",
             "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
@@ -54,23 +55,80 @@ jobs:
             "charset" => "utf8",
           ];' > common/config/codeception-local.php
           
-          echo "<?php return [];" > backend/config/codeception-local.php
-          echo "<?php return [];" > frontend/config/codeception-local.php
+          # Create basic app configs with required 'id' property
+          echo '<?php return [
+            "id" => "frontend-tests",
+            "class" => "yii\web\Application",
+            "basePath" => __DIR__."/../../frontend",
+            "runtimePath" => __DIR__."/../../frontend/runtime",
+            "vendorPath" => __DIR__."/../../vendor",
+            "bootstrap" => ["log"],
+            "aliases" => [
+              "@bower" => "@vendor/bower-asset",
+              "@npm"   => "@vendor/npm-asset",
+            ],
+            "components" => [
+              "db" => [
+                "class" => "yii\db\Connection",
+                "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
+                "username" => "root",
+                "password" => "root",
+                "charset" => "utf8",
+              ],
+              "mailer" => [
+                "useFileTransport" => true,
+              ],
+              "urlManager" => [
+                "enablePrettyUrl" => true,
+                "showScriptName" => false,
+              ],
+            ],
+          ];' > frontend/config/codeception-local.php
+          
+          echo '<?php return [
+            "id" => "backend-tests",
+            "class" => "yii\web\Application",
+            "basePath" => __DIR__."/../../backend",
+            "runtimePath" => __DIR__."/../../backend/runtime",
+            "vendorPath" => __DIR__."/../../vendor",
+            "bootstrap" => ["log"],
+            "aliases" => [
+              "@bower" => "@vendor/bower-asset",
+              "@npm"   => "@vendor/npm-asset",
+            ],
+            "components" => [
+              "db" => [
+                "class" => "yii\db\Connection",
+                "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
+                "username" => "root",
+                "password" => "root",
+                "charset" => "utf8",
+              ],
+              "mailer" => [
+                "useFileTransport" => true,
+              ],
+              "urlManager" => [
+                "enablePrettyUrl" => true,
+                "showScriptName" => false,
+              ],
+            ],
+          ];' > backend/config/codeception-local.php
 
       - name: Set permissions
         run: |
           chmod -R 777 backend/runtime
+          chmod -R 777 backend/web/assets
           chmod -R 777 frontend/runtime
+          chmod -R 777 frontend/web/assets
 
       - name: Check for console application
         run: |
-          ls -la
           if [ -f "yii" ]; then
             chmod +x yii
-            php yii
+            echo "Found yii console application"
           elif [ -f "console/yii" ]; then
             chmod +x console/yii
-            php console/yii
+            echo "Found console/yii application"
           else
             echo "No yii console application found"
             find . -name "yii*" -type f
@@ -79,9 +137,9 @@ jobs:
       - name: Run database migrations
         run: |
           if [ -f "yii" ]; then
-            php yii migrate/up --interactive=0
+            php yii migrate/fresh --interactive=0
           elif [ -f "console/yii" ]; then
-            php console/yii migrate/up --interactive=0
+            php console/yii migrate/fresh --interactive=0
           else
             echo "No yii console application found - skipping migrations"
           fi
