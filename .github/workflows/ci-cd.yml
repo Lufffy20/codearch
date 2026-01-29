@@ -34,9 +34,14 @@ jobs:
         with:
           php-version: '8.2'
           extensions: mbstring, intl, pdo, pdo_mysql
+          ini-values: error_reporting=E_ALL, display_errors=On
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Clear and rebuild autoloader
+        run: |
+          composer dump-autoload --optimize
 
       - name: Wait for MySQL
         run: |
@@ -46,7 +51,7 @@ jobs:
 
       - name: Create Codeception local configs
         run: |
-          # Create database config without invalid 'components' property
+          # Create database config
           echo '<?php return [
             "class" => "yii\db\Connection",
             "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
@@ -55,7 +60,7 @@ jobs:
             "charset" => "utf8",
           ];' > common/config/codeception-local.php
           
-          # Create basic app configs with required 'id' property
+          # Create frontend app config
           echo '<?php return [
             "id" => "frontend-tests",
             "class" => "yii\web\Application",
@@ -82,9 +87,13 @@ jobs:
                 "enablePrettyUrl" => true,
                 "showScriptName" => false,
               ],
+              "request" => [
+                "cookieValidationKey" => "test-key",
+              ],
             ],
           ];' > frontend/config/codeception-local.php
           
+          # Create backend app config
           echo '<?php return [
             "id" => "backend-tests",
             "class" => "yii\web\Application",
@@ -110,6 +119,9 @@ jobs:
               "urlManager" => [
                 "enablePrettyUrl" => true,
                 "showScriptName" => false,
+              ],
+              "request" => [
+                "cookieValidationKey" => "test-key",
               ],
             ],
           ];' > backend/config/codeception-local.php
@@ -146,5 +158,12 @@ jobs:
         env:
           YII_ENV: test
 
-      - name: Run Codeception tests
-        run: vendor/bin/codecept run
+      - name: Run Codeception tests with specific suite
+        run: |
+          # Run unit tests first to isolate issues
+          echo "Running unit tests..."
+          vendor/bin/codecept run unit
+          
+          # Then run functional tests
+          echo "Running functional tests..."
+          vendor/bin/codecept run functional
