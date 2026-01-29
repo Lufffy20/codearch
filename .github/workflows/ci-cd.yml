@@ -158,12 +158,19 @@ jobs:
         env:
           YII_ENV: test
 
-      - name: Run Codeception tests with specific suite
+      - name: Run individual test suites
         run: |
-          # Run unit tests first to isolate issues
-          echo "Running unit tests..."
-          vendor/bin/codecept run unit
+          echo "Running common unit tests..."
+          vendor/bin/codecept run common/unit
           
-          # Then run functional tests
-          echo "Running functional tests..."
-          vendor/bin/codecept run functional
+          echo "Running frontend unit tests..."
+          vendor/bin/codecept run frontend/unit
+          
+          echo "Running frontend functional tests..."
+          vendor/bin/codecept run frontend/functional
+          
+          echo "Running backend unit tests..."
+          vendor/bin/codecept run backend/unit
+          
+          echo "Running backend functional tests..."
+          vendor/bin/codecept run backend/functional
