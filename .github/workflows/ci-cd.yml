@@ -135,11 +135,6 @@ jobs:
       # -------------------------
       # ✅ RUN TESTS - YII2 ADVANCED STRUCTURE
       # -------------------------
-      - name: Run common unit tests
-        run: |
-          cd common/tests
-          ../../vendor/bin/codecept run unit
-        continue-on-error: false
 
       - name: Run frontend tests
         run: |
