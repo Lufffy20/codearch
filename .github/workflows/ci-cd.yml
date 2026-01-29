@@ -25,6 +25,10 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+    env:
+      YII_ENV: test
+      YII_DEBUG: true
+
     steps:
       # -------------------------
       # Checkout
@@ -52,59 +56,66 @@ jobs:
         run: composer dump-autoload --optimize --classmap-authoritative
 
       # -------------------------
-      # Yii2 Init (NON-interactive)
+      # Yii2 Init (CI-safe)
       # -------------------------
-      - name: Yii2 init (test env)
+      - name: Yii2 init (Development)
         run: php init --env=Development --overwrite=All
 
       # -------------------------
-      # MySQL Ready Check
+      # Wait for MySQL
       # -------------------------
       - name: Wait for MySQL
         run: |
-          for i in {1..10}; do
-            mysql -h 127.0.0.1 -u root -proot -e "SELECT 1" && break
-            echo "Waiting for MySQL..."
+          for i in {1..12}; do
+            mysql -h 127.0.0.1 -u root -proot -e "SELECT 1" && exit 0
+            echo "⏳ Waiting for MySQL..."
             sleep 5
           done
+          echo "❌ MySQL not ready" && exit 1
 
       # -------------------------
-      # Codeception local configs
+      # Codeception configs
       # -------------------------
       - name: Create Codeception local configs
         run: |
-          # COMMON
-          echo '<?php return [
-            "class" => "yii\db\Connection",
-            "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
-            "username" => "root",
-            "password" => "root",
-            "charset" => "utf8",
-          ];' > common/config/codeception-local.php
+          cat <<'PHP' > common/config/codeception-local.php
+          <?php
+          return [
+              'class' => 'yii\db\Connection',
+              'dsn' => 'mysql:host=127.0.0.1;dbname=codearch_test',
+              'username' => 'root',
+              'password' => 'root',
+              'charset' => 'utf8',
+          ];
+          PHP
 
-          # FRONTEND
-          echo '<?php return [
-            "id" => "frontend-tests",
-            "basePath" => dirname(__DIR__, 2)."/frontend",
-            "vendorPath" => dirname(__DIR__, 2)."/vendor",
-            "components" => [
-              "db" => require dirname(__DIR__, 2)."/common/config/codeception-local.php",
-              "mailer" => ["useFileTransport" => true],
-              "request" => ["cookieValidationKey" => "test-key"],
-            ],
-          ];' > frontend/config/codeception-local.php
+          cat <<'PHP' > frontend/config/codeception-local.php
+          <?php
+          return [
+              'id' => 'frontend-tests',
+              'basePath' => dirname(__DIR__, 2) . '/frontend',
+              'vendorPath' => dirname(__DIR__, 2) . '/vendor',
+              'components' => [
+                  'db' => require dirname(__DIR__, 2) . '/common/config/codeception-local.php',
+                  'mailer' => ['useFileTransport' => true],
+                  'request' => ['cookieValidationKey' => 'test-key'],
+              ],
+          ];
+          PHP
 
-          # BACKEND
-          echo '<?php return [
-            "id" => "backend-tests",
-            "basePath" => dirname(__DIR__, 2)."/backend",
-            "vendorPath" => dirname(__DIR__, 2)."/vendor",
-            "components" => [
-              "db" => require dirname(__DIR__, 2)."/common/config/codeception-local.php",
-              "mailer" => ["useFileTransport" => true],
-              "request" => ["cookieValidationKey" => "test-key"],
-            ],
-          ];' > backend/config/codeception-local.php
+          cat <<'PHP' > backend/config/codeception-local.php
+          <?php
+          return [
+              'id' => 'backend-tests',
+              'basePath' => dirname(__DIR__, 2) . '/backend',
+              'vendorPath' => dirname(__DIR__, 2) . '/vendor',
+              'components' => [
+                  'db' => require dirname(__DIR__, 2) . '/common/config/codeception-local.php',
+                  'mailer' => ['useFileTransport' => true],
+                  'request' => ['cookieValidationKey' => 'test-key'],
+              ],
+          ];
+          PHP
 
       # -------------------------
       # Permissions
@@ -115,15 +126,13 @@ jobs:
           chmod -R 777 backend/runtime backend/web/assets
 
       # -------------------------
-      # DB Migrations
+      # Migrations
       # -------------------------
       - name: Run migrations
         run: php console/yii migrate --interactive=0
-        env:
-          YII_ENV: test
 
       # -------------------------
-      # ✅ RUN TESTS
+      # Tests
       # -------------------------
       - name: Run frontend tests
         run: vendor/bin/codecept run -- -c frontend
