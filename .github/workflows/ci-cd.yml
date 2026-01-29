@@ -38,9 +38,22 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Wait for MySQL
+        run: |
+          sleep 10s
+          # Verify MySQL is accessible
+          mysql -h 127.0.0.1 -u root -proot -e "SELECT 1;"
+
       - name: Create Codeception local configs
         run: |
-          echo "<?php return [];" > common/config/codeception-local.php
+          echo '<?php return [
+            "class" => "yii\db\Connection",
+            "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
+            "username" => "root",
+            "password" => "root",
+            "charset" => "utf8",
+          ];' > common/config/codeception-local.php
+          
           echo "<?php return [];" > backend/config/codeception-local.php
           echo "<?php return [];" > frontend/config/codeception-local.php
 
@@ -49,5 +62,11 @@ jobs:
           chmod -R 777 backend/runtime
           chmod -R 777 frontend/runtime
 
-      - name: Run Codeception tests (ROOT, same as local)
+      - name: Run database migrations
+        run: |
+          php yii migrate/up --interactive=0
+        env:
+          YII_ENV: test
+
+      - name: Run Codeception tests
         run: vendor/bin/codecept run
