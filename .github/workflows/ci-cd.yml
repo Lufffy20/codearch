@@ -146,13 +146,13 @@ jobs:
       # ✅ RUN TESTS - YII2 ADVANCED STRUCTURE
       # -------------------------
       - name: Run common tests
-        run: vendor/bin/codecept run -c common
+        run: vendor/bin/codecept run -c common -vvv
         continue-on-error: false
 
       - name: Run frontend tests
-        run: vendor/bin/codecept run -c frontend
+        run: vendor/bin/codecept run -c frontend -vvv
         continue-on-error: false
 
       - name: Run backend tests
-        run: vendor/bin/codecept run -c backend
+        run: vendor/bin/codecept run -c backend -vvv
         continue-on-error: false
