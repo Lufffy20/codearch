@@ -38,6 +38,12 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Create Codeception local configs
+        run: |
+          echo "<?php return [];" > common/config/codeception-local.php
+          echo "<?php return [];" > backend/config/codeception-local.php
+          echo "<?php return [];" > frontend/config/codeception-local.php
+
       - name: Set permissions
         run: |
           chmod -R 777 backend/runtime
