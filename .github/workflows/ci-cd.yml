@@ -26,9 +26,15 @@ jobs:
           --health-retries=3
 
     steps:
+      # -------------------------
+      # Checkout
+      # -------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # -------------------------
+      # PHP Setup
+      # -------------------------
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -36,22 +42,29 @@ jobs:
           extensions: mbstring, intl, pdo, pdo_mysql
           ini-values: error_reporting=E_ALL, display_errors=On
 
+      # -------------------------
+      # Composer
+      # -------------------------
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Clear and rebuild autoloader
-        run: |
-          composer dump-autoload --optimize
+      - name: Optimize autoloader
+        run: composer dump-autoload --optimize
 
+      # -------------------------
+      # MySQL Ready Check
+      # -------------------------
       - name: Wait for MySQL
         run: |
-          sleep 10s
-          # Verify MySQL is accessible
+          sleep 10
           mysql -h 127.0.0.1 -u root -proot -e "SELECT 1;"
 
+      # -------------------------
+      # Codeception local configs
+      # -------------------------
       - name: Create Codeception local configs
         run: |
-          # Create database config
+          # COMMON (DB only)
           echo '<?php return [
             "class" => "yii\db\Connection",
             "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
@@ -59,19 +72,12 @@ jobs:
             "password" => "root",
             "charset" => "utf8",
           ];' > common/config/codeception-local.php
-          
-          # Create frontend app config
+
+          # FRONTEND
           echo '<?php return [
             "id" => "frontend-tests",
-            "class" => "yii\web\Application",
             "basePath" => __DIR__."/../../frontend",
-            "runtimePath" => __DIR__."/../../frontend/runtime",
             "vendorPath" => __DIR__."/../../vendor",
-            "bootstrap" => ["log"],
-            "aliases" => [
-              "@bower" => "@vendor/bower-asset",
-              "@npm"   => "@vendor/npm-asset",
-            ],
             "components" => [
               "db" => [
                 "class" => "yii\db\Connection",
@@ -80,31 +86,16 @@ jobs:
                 "password" => "root",
                 "charset" => "utf8",
               ],
-              "mailer" => [
-                "useFileTransport" => true,
-              ],
-              "urlManager" => [
-                "enablePrettyUrl" => true,
-                "showScriptName" => false,
-              ],
-              "request" => [
-                "cookieValidationKey" => "test-key",
-              ],
+              "mailer" => ["useFileTransport" => true],
+              "request" => ["cookieValidationKey" => "test-key"],
             ],
           ];' > frontend/config/codeception-local.php
-          
-          # Create backend app config
+
+          # BACKEND
           echo '<?php return [
             "id" => "backend-tests",
-            "class" => "yii\web\Application",
             "basePath" => __DIR__."/../../backend",
-            "runtimePath" => __DIR__."/../../backend/runtime",
             "vendorPath" => __DIR__."/../../vendor",
-            "bootstrap" => ["log"],
-            "aliases" => [
-              "@bower" => "@vendor/bower-asset",
-              "@npm"   => "@vendor/npm-asset",
-            ],
             "components" => [
               "db" => [
                 "class" => "yii\db\Connection",
@@ -113,52 +104,39 @@ jobs:
                 "password" => "root",
                 "charset" => "utf8",
               ],
-              "mailer" => [
-                "useFileTransport" => true,
-              ],
-              "urlManager" => [
-                "enablePrettyUrl" => true,
-                "showScriptName" => false,
-              ],
-              "request" => [
-                "cookieValidationKey" => "test-key",
-              ],
+              "mailer" => ["useFileTransport" => true],
+              "request" => ["cookieValidationKey" => "test-key"],
             ],
           ];' > backend/config/codeception-local.php
 
+      # -------------------------
+      # Permissions
+      # -------------------------
       - name: Set permissions
         run: |
-          chmod -R 777 backend/runtime
-          chmod -R 777 backend/web/assets
-          chmod -R 777 frontend/runtime
-          chmod -R 777 frontend/web/assets
+          chmod -R 777 frontend/runtime frontend/web/assets
+          chmod -R 777 backend/runtime backend/web/assets
 
-      - name: Check for console application
+      # -------------------------
+      # DB Migrations (optional)
+      # -------------------------
+      - name: Run migrations
         run: |
           if [ -f "yii" ]; then
-            chmod +x yii
-            echo "Found yii console application"
+            php yii migrate --interactive=0
           elif [ -f "console/yii" ]; then
-            chmod +x console/yii
-            echo "Found console/yii application"
+            php console/yii migrate --interactive=0
           else
-            echo "No yii console application found"
-            find . -name "yii*" -type f
-          fi
-
-      - name: Run database migrations
-        run: |
-          if [ -f "yii" ]; then
-            php yii migrate/fresh --interactive=0
-          elif [ -f "console/yii" ]; then
-            php console/yii migrate/fresh --interactive=0
-          else
-            echo "No yii console application found - skipping migrations"
+            echo "No yii console found, skipping migrations"
           fi
         env:
           YII_ENV: test
 
-      - name: Run only unit tests to avoid controller loading issues
+      # -------------------------
+      # ✅ RUN UNIT TESTS (CORRECT WAY)
+      # -------------------------
+      - name: Run unit tests (Yii2 Advanced)
         run: |
-          echo "Running unit tests only to avoid functional test issues..."
-          vendor/bin/codecept run unit
+          vendor/bin/codecept run common:unit
+          vendor/bin/codecept run frontend:unit
+          vendor/bin/codecept run backend:unit
