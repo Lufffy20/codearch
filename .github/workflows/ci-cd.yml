@@ -49,7 +49,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Optimize autoloader
-        run: composer dump-autoload --optimize
+        run: composer dump-autoload --optimize --classmap-authoritative
 
       # -------------------------
       # MySQL Ready Check
@@ -76,8 +76,8 @@ jobs:
           # FRONTEND
           echo '<?php return [
             "id" => "frontend-tests",
-            "basePath" => __DIR__."/../../frontend",
-            "vendorPath" => __DIR__."/../../vendor",
+            "basePath" => dirname(__DIR__, 2)."/frontend",
+            "vendorPath" => dirname(__DIR__, 2)."/vendor",
             "components" => [
               "db" => [
                 "class" => "yii\db\Connection",
@@ -94,8 +94,8 @@ jobs:
           # BACKEND
           echo '<?php return [
             "id" => "backend-tests",
-            "basePath" => __DIR__."/../../backend",
-            "vendorPath" => __DIR__."/../../vendor",
+            "basePath" => dirname(__DIR__, 2)."/backend",
+            "vendorPath" => dirname(__DIR__, 2)."/vendor",
             "components" => [
               "db" => [
                 "class" => "yii\db\Connection",
@@ -118,7 +118,7 @@ jobs:
           chmod -R 777 backend/runtime backend/web/assets
 
       # -------------------------
-      # DB Migrations (optional)
+      # DB Migrations
       # -------------------------
       - name: Run migrations
         run: |
@@ -133,8 +133,16 @@ jobs:
           YII_ENV: test
 
       # -------------------------
-      # ✅ RUN UNIT TESTS (CORRECT WAY)
+      # ✅ RUN TESTS - SEPARATE SUITES
       # -------------------------
-      - name: Run unit tests (Yii2 Advanced)
-        run: |
-          vendor/bin/codecept run 
+      - name: Run common unit tests
+        run: vendor/bin/codecept run common
+        continue-on-error: false
+
+      - name: Run frontend tests
+        run: vendor/bin/codecept run frontend
+        continue-on-error: false
+
+      - name: Run backend tests
+        run: vendor/bin/codecept run backend
+        continue-on-error: false
