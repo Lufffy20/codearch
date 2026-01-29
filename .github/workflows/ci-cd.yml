@@ -25,50 +25,106 @@ jobs:
           --health-timeout=5s
           --health-retries=3
 
+    env:
+      YII_ENV: test
+      YII_DEBUG: true
+
     steps:
+      # -------------------------
+      # Checkout
+      # -------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # -------------------------
+      # PHP
+      # -------------------------
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: mbstring, intl, pdo, pdo_mysql
 
+      # -------------------------
+      # Composer
+      # -------------------------
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      # ✅ YII INIT (correct place)
+      # -------------------------
+      # Yii Init (REQUIRED)
+      # -------------------------
       - name: Yii2 init
         run: php init --env=Development --overwrite=All
 
+      # -------------------------
+      # Wait for MySQL
+      # -------------------------
       - name: Wait for MySQL
         run: |
-          sleep 10s
+          sleep 10
           mysql -h 127.0.0.1 -u root -proot -e "SELECT 1;"
 
+      # -------------------------
+      # 🔥 MAIN FIX (Console DB)
+      # -------------------------
+      - name: Create main-local.php (DB for migrations)
+        run: |
+          cat <<'PHP' > common/config/main-local.php
+          <?php
+          return [
+              'components' => [
+                  'db' => [
+                      'class' => 'yii\db\Connection',
+                      'dsn' => 'mysql:host=127.0.0.1;dbname=codearch_test',
+                      'username' => 'root',
+                      'password' => 'root',
+                      'charset' => 'utf8',
+                  ],
+              ],
+          ];
+          PHP
+
+      # -------------------------
+      # Codeception configs
+      # -------------------------
       - name: Create Codeception local configs
         run: |
-          echo '<?php return [
-            "class" => "yii\db\Connection",
-            "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
-            "username" => "root",
-            "password" => "root",
-            "charset" => "utf8",
-          ];' > common/config/codeception-local.php
+          cat <<'PHP' > common/config/codeception-local.php
+          <?php
+          return require __DIR__ . '/main-local.php';
+          PHP
 
-          echo "<?php return [];" > backend/config/codeception-local.php
-          echo "<?php return [];" > frontend/config/codeception-local.php
+          cat <<'PHP' > backend/config/codeception-local.php
+          <?php return []; ?>
+          PHP
 
+          cat <<'PHP' > frontend/config/codeception-local.php
+          <?php return []; ?>
+          PHP
+
+      # -------------------------
+      # Permissions
+      # -------------------------
       - name: Set permissions
         run: |
-          chmod -R 777 backend/runtime
-          chmod -R 777 frontend/runtime
+          chmod -R 777 backend/runtime backend/web/assets
+          chmod -R 777 frontend/runtime frontend/web/assets
 
+      # -------------------------
+      # Migrations (NOW WORKING)
+      # -------------------------
       - name: Run database migrations
         run: php yii migrate --interactive=0
-        env:
-          YII_ENV: test
 
-      - name: Run Codeception tests
-        run: vendor/bin/codecept run
+      # -------------------------
+      # Tests (ADVANCED STRUCTURE)
+      # -------------------------
+      - name: Run common tests
+        run: vendor/bin/codecept run -- -c common
+
+      - name: Run frontend tests
+        run: vendor/bin/codecept run -- -c frontend
+
+      - name: Run backend tests
+        run: vendor/bin/codecept run -- -c backend
