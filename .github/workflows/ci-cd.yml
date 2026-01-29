@@ -50,15 +50,15 @@ jobs:
       # Composer
       # -------------------------
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        run: composer install --no-interaction --prefer-dist
 
       - name: Optimize autoloader
-        run: composer dump-autoload --optimize --classmap-authoritative
+        run: composer dump-autoload --optimize
 
       # -------------------------
-      # Yii2 Init (CI-safe)
+      # Yii Init (safe for CI)
       # -------------------------
-      - name: Yii2 init (Development)
+      - name: Yii2 init
         run: php init --env=Development --overwrite=All
 
       # -------------------------
@@ -74,29 +74,41 @@ jobs:
           echo "❌ MySQL not ready" && exit 1
 
       # -------------------------
+      # 🔥 FIX: Console DB config
+      # -------------------------
+      - name: Create main-local.php (DB for console)
+        run: |
+          cat <<'PHP' > common/config/main-local.php
+          <?php
+          return [
+              'components' => [
+                  'db' => [
+                      'class' => 'yii\db\Connection',
+                      'dsn' => 'mysql:host=127.0.0.1;port=3306;dbname=codearch_test',
+                      'username' => 'root',
+                      'password' => 'root',
+                      'charset' => 'utf8',
+                  ],
+              ],
+          ];
+          PHP
+
+      # -------------------------
       # Codeception configs
       # -------------------------
-      - name: Create Codeception local configs
+      - name: Create Codeception configs
         run: |
           cat <<'PHP' > common/config/codeception-local.php
           <?php
-          return [
-              'class' => 'yii\db\Connection',
-              'dsn' => 'mysql:host=127.0.0.1;dbname=codearch_test',
-              'username' => 'root',
-              'password' => 'root',
-              'charset' => 'utf8',
-          ];
+          return require __DIR__ . '/main-local.php';
           PHP
 
           cat <<'PHP' > frontend/config/codeception-local.php
           <?php
           return [
               'id' => 'frontend-tests',
-              'basePath' => dirname(__DIR__, 2) . '/frontend',
-              'vendorPath' => dirname(__DIR__, 2) . '/vendor',
               'components' => [
-                  'db' => require dirname(__DIR__, 2) . '/common/config/codeception-local.php',
+                  'db' => require dirname(__DIR__, 2) . '/common/config/main-local.php',
                   'mailer' => ['useFileTransport' => true],
                   'request' => ['cookieValidationKey' => 'test-key'],
               ],
@@ -107,10 +119,8 @@ jobs:
           <?php
           return [
               'id' => 'backend-tests',
-              'basePath' => dirname(__DIR__, 2) . '/backend',
-              'vendorPath' => dirname(__DIR__, 2) . '/vendor',
               'components' => [
-                  'db' => require dirname(__DIR__, 2) . '/common/config/codeception-local.php',
+                  'db' => require dirname(__DIR__, 2) . '/common/config/main-local.php',
                   'mailer' => ['useFileTransport' => true],
                   'request' => ['cookieValidationKey' => 'test-key'],
               ],
@@ -125,23 +135,11 @@ jobs:
           chmod -R 777 frontend/runtime frontend/web/assets
           chmod -R 777 backend/runtime backend/web/assets
 
-            # -------------------------
-      # Migrations (Yii2 Safe)
+      # -------------------------
+      # Migrations (NOW FIXED)
       # -------------------------
       - name: Run migrations
-        run: |
-          if [ -f "yii" ]; then
-            echo "✅ Using root yii"
-            php yii migrate --interactive=0
-          elif [ -f "console/yii" ]; then
-            echo "✅ Using console/yii"
-            php console/yii migrate --interactive=0
-          else
-            echo "❌ Yii console not found"
-            ls -la
-            exit 1
-          fi
-
+        run: php yii migrate --interactive=0
 
       # -------------------------
       # Tests
