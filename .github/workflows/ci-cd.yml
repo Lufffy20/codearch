@@ -55,7 +55,7 @@ jobs:
       # Yii2 Init (NON-interactive)
       # -------------------------
       - name: Yii2 init (test env)
-        run: php init --env=test --overwrite=All
+        run: php init --env=Development --overwrite=All
 
       # -------------------------
       # MySQL Ready Check
