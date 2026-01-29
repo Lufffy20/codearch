@@ -28,7 +28,6 @@ jobs:
         run: |
           chmod -R 777 backend/runtime
           chmod -R 777 frontend/runtime
-          chmod -R 777 common/runtime
 
       - name: Run tests
         run: vendor/bin/codecept run
