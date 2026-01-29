@@ -49,6 +49,16 @@ jobs:
           # Verify MySQL is accessible
           mysql -h 127.0.0.1 -u root -proot -e "SELECT 1;"
 
+      - name: Display Codeception configuration
+        run: |
+          ls -la
+          echo "Checking for codeception.yml..."
+          cat codeception.yml
+          echo "Checking test directories..."
+          find . -name "codeception.yml" -o -name "*.suite.yml" | head -10
+          echo "Checking test structure..."
+          find . -path "./vendor" -prune -o -path "./.git" -prune -o -name "*test*.php" -o -name "*Test*.php" | head -20
+
       - name: Create Codeception local configs
         run: |
           # Create database config
@@ -158,19 +168,7 @@ jobs:
         env:
           YII_ENV: test
 
-      - name: Run individual test suites
+      - name: Run Codeception tests (default behavior)
         run: |
-          echo "Running common unit tests..."
-          vendor/bin/codecept run common/unit
-          
-          echo "Running frontend unit tests..."
-          vendor/bin/codecept run frontend/unit
-          
-          echo "Running frontend functional tests..."
-          vendor/bin/codecept run frontend/functional
-          
-          echo "Running backend unit tests..."
-          vendor/bin/codecept run backend/unit
-          
-          echo "Running backend functional tests..."
-          vendor/bin/codecept run backend/functional
+          echo "Running all tests with default configuration..."
+          vendor/bin/codecept run
