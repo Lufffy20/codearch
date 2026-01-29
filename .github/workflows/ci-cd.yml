@@ -125,11 +125,23 @@ jobs:
           chmod -R 777 frontend/runtime frontend/web/assets
           chmod -R 777 backend/runtime backend/web/assets
 
-      # -------------------------
-      # Migrations
+            # -------------------------
+      # Migrations (Yii2 Safe)
       # -------------------------
       - name: Run migrations
-        run: php console/yii migrate --interactive=0
+        run: |
+          if [ -f "yii" ]; then
+            echo "✅ Using root yii"
+            php yii migrate --interactive=0
+          elif [ -f "console/yii" ]; then
+            echo "✅ Using console/yii"
+            php console/yii migrate --interactive=0
+          else
+            echo "❌ Yii console not found"
+            ls -la
+            exit 1
+          fi
+
 
       # -------------------------
       # Tests
