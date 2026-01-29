@@ -49,11 +49,5 @@ jobs:
           chmod -R 777 backend/runtime
           chmod -R 777 frontend/runtime
 
-      - name: Run Codeception tests
-        run: |
-          cd common
-          ../vendor/bin/codecept run
-          cd ../backend
-          ../vendor/bin/codecept run
-          cd ../frontend
-          ../vendor/bin/codecept run
+      - name: Run Codeception tests (same as local)
+        run: vendor/bin/codecept run
