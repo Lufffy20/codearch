@@ -20,10 +20,10 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=5
 
     steps:
       # -------------------------
@@ -52,19 +52,28 @@ jobs:
         run: composer dump-autoload --optimize --classmap-authoritative
 
       # -------------------------
+      # Yii2 Init (NON-interactive)
+      # -------------------------
+      - name: Yii2 init (test env)
+        run: php init --env=test --overwrite=All
+
+      # -------------------------
       # MySQL Ready Check
       # -------------------------
       - name: Wait for MySQL
         run: |
-          sleep 10
-          mysql -h 127.0.0.1 -u root -proot -e "SELECT 1;"
+          for i in {1..10}; do
+            mysql -h 127.0.0.1 -u root -proot -e "SELECT 1" && break
+            echo "Waiting for MySQL..."
+            sleep 5
+          done
 
       # -------------------------
       # Codeception local configs
       # -------------------------
       - name: Create Codeception local configs
         run: |
-          # COMMON (DB only)
+          # COMMON
           echo '<?php return [
             "class" => "yii\db\Connection",
             "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
@@ -79,13 +88,7 @@ jobs:
             "basePath" => dirname(__DIR__, 2)."/frontend",
             "vendorPath" => dirname(__DIR__, 2)."/vendor",
             "components" => [
-              "db" => [
-                "class" => "yii\db\Connection",
-                "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
-                "username" => "root",
-                "password" => "root",
-                "charset" => "utf8",
-              ],
+              "db" => require dirname(__DIR__, 2)."/common/config/codeception-local.php",
               "mailer" => ["useFileTransport" => true],
               "request" => ["cookieValidationKey" => "test-key"],
             ],
@@ -97,13 +100,7 @@ jobs:
             "basePath" => dirname(__DIR__, 2)."/backend",
             "vendorPath" => dirname(__DIR__, 2)."/vendor",
             "components" => [
-              "db" => [
-                "class" => "yii\db\Connection",
-                "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
-                "username" => "root",
-                "password" => "root",
-                "charset" => "utf8",
-              ],
+              "db" => require dirname(__DIR__, 2)."/common/config/codeception-local.php",
               "mailer" => ["useFileTransport" => true],
               "request" => ["cookieValidationKey" => "test-key"],
             ],
@@ -121,25 +118,15 @@ jobs:
       # DB Migrations
       # -------------------------
       - name: Run migrations
-        run: |
-          if [ -f "yii" ]; then
-            php yii migrate --interactive=0
-          elif [ -f "console/yii" ]; then
-            php console/yii migrate --interactive=0
-          else
-            echo "No yii console found, skipping migrations"
-          fi
+        run: php console/yii migrate --interactive=0
         env:
           YII_ENV: test
 
       # -------------------------
-      # ✅ RUN TESTS - YII2 ADVANCED STRUCTURE
+      # ✅ RUN TESTS
       # -------------------------
-
       - name: Run frontend tests
-        run: |
-           vendor/bin/codecept run -- -c frontend     
+        run: vendor/bin/codecept run -- -c frontend
 
       - name: Run backend tests
-        run: |
-           vendor/bin/codecept run -- -c backend  
+        run: vendor/bin/codecept run -- -c backend
