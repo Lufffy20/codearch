@@ -86,7 +86,7 @@ jobs:
           PHP
 
       # -------------------------
-      # Codeception configs
+      # Codeception config
       # -------------------------
       - name: Create Codeception local configs
         run: |
