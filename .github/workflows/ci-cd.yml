@@ -49,5 +49,5 @@ jobs:
           chmod -R 777 backend/runtime
           chmod -R 777 frontend/runtime
 
-      - name: Run Codeception tests (same as local)
+      - name: Run Codeception tests (ROOT, same as local)
         run: vendor/bin/codecept run
