@@ -60,67 +60,54 @@ jobs:
           mysql -h 127.0.0.1 -u root -proot -e "SELECT 1;"
 
       # -------------------------
-      # Codeception local configs - CORRECTED
+      # Codeception local configs
       # -------------------------
       - name: Create Codeception local configs
         run: |
-          # COMMON (DB connection only - correct format)
-          cat > common/config/codeception-local.php << 'EOF'
-<?php
-return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=127.0.0.1;dbname=codearch_test',
-    'username' => 'root',
-    'password' => 'root',
-    'charset' => 'utf8',
-];
-EOF
+          # COMMON (DB only)
+          echo '<?php return [
+            "class" => "yii\db\Connection",
+            "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
+            "username" => "root",
+            "password" => "root",
+            "charset" => "utf8",
+          ];' > common/config/codeception-local.php
 
-          # FRONTEND (Full app config)
-          cat > frontend/config/codeception-local.php << 'EOF'
-<?php
-return [
-    'id' => 'frontend-tests',
-    'components' => [
-        'db' => [
-            'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=127.0.0.1;dbname=codearch_test',
-            'username' => 'root',
-            'password' => 'root',
-            'charset' => 'utf8',
-        ],
-        'mailer' => [
-            'useFileTransport' => true,
-        ],
-        'request' => [
-            'cookieValidationKey' => 'test-key',
-        ],
-    ],
-];
-EOF
+          # FRONTEND
+          echo '<?php return [
+            "id" => "frontend-tests",
+            "basePath" => dirname(__DIR__, 2)."/frontend",
+            "vendorPath" => dirname(__DIR__, 2)."/vendor",
+            "components" => [
+              "db" => [
+                "class" => "yii\db\Connection",
+                "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
+                "username" => "root",
+                "password" => "root",
+                "charset" => "utf8",
+              ],
+              "mailer" => ["useFileTransport" => true],
+              "request" => ["cookieValidationKey" => "test-key"],
+            ],
+          ];' > frontend/config/codeception-local.php
 
-          # BACKEND (Full app config)
-          cat > backend/config/codeception-local.php << 'EOF'
-<?php
-return [
-    'id' => 'backend-tests',
-    'components' => [
-        'db' => [
-            'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=127.0.0.1;dbname=codearch_test',
-            'username' => 'root',
-            'password' => 'root',
-            'charset' => 'utf8',
-        ],
-        'mailer' => [
-            'useFileTransport' => true,
-        ],
-        'request' => [
-            'cookieValidationKey' => 'test-key',
-        ],
-    ],
-];
-EOF
+          # BACKEND
+          echo '<?php return [
+            "id" => "backend-tests",
+            "basePath" => dirname(__DIR__, 2)."/backend",
+            "vendorPath" => dirname(__DIR__, 2)."/vendor",
+            "components" => [
+              "db" => [
+                "class" => "yii\db\Connection",
+                "dsn" => "mysql:host=127.0.0.1;dbname=codearch_test",
+                "username" => "root",
+                "password" => "root",
+                "charset" => "utf8",
+              ],
+              "mailer" => ["useFileTransport" => true],
+              "request" => ["cookieValidationKey" => "test-key"],
+            ],
+          ];' > backend/config/codeception-local.php
 
       # -------------------------
       # Permissions
@@ -129,15 +116,6 @@ EOF
         run: |
           chmod -R 777 frontend/runtime frontend/web/assets
           chmod -R 777 backend/runtime backend/web/assets
-
-      # -------------------------
-      # Initialize Codeception
-      # -------------------------
-      - name: Initialize Codeception tests
-        run: |
-          cd common && php ../vendor/bin/codecept build
-          cd ../frontend && php ../vendor/bin/codecept build
-          cd ../backend && php ../vendor/bin/codecept build
 
       # -------------------------
       # DB Migrations
@@ -155,16 +133,13 @@ EOF
           YII_ENV: test
 
       # -------------------------
-      # ✅ RUN TESTS
+      # ✅ RUN TESTS - YII2 ADVANCED STRUCTURE
       # -------------------------
-      - name: Run common tests
-        run: vendor/bin/codecept run -c common
-        continue-on-error: false
 
       - name: Run frontend tests
-        run: vendor/bin/codecept run -c frontend
-        continue-on-error: false
+        run: |
+           vendor/bin/codecept run -- -c frontend     
 
       - name: Run backend tests
-        run: vendor/bin/codecept run -c backend
-        continue-on-error: false
+        run: |
+           vendor/bin/codecept run -- -c backend  
