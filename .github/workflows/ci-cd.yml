@@ -43,5 +43,8 @@ jobs:
           chmod -R 777 backend/runtime
           chmod -R 777 frontend/runtime
 
-      - name: Run unit tests
-        run: vendor/bin/codecept run unit
+      - name: Run Codeception tests
+        run: |
+          vendor/bin/codecept run common
+          vendor/bin/codecept run backend
+          vendor/bin/codecept run frontend
