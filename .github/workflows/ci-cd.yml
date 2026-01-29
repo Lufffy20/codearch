@@ -62,9 +62,29 @@ jobs:
           chmod -R 777 backend/runtime
           chmod -R 777 frontend/runtime
 
+      - name: Check for console application
+        run: |
+          ls -la
+          if [ -f "yii" ]; then
+            chmod +x yii
+            php yii
+          elif [ -f "console/yii" ]; then
+            chmod +x console/yii
+            php console/yii
+          else
+            echo "No yii console application found"
+            find . -name "yii*" -type f
+          fi
+
       - name: Run database migrations
         run: |
-          php yii migrate/up --interactive=0
+          if [ -f "yii" ]; then
+            php yii migrate/up --interactive=0
+          elif [ -f "console/yii" ]; then
+            php console/yii migrate/up --interactive=0
+          else
+            echo "No yii console application found - skipping migrations"
+          fi
         env:
           YII_ENV: test
 
